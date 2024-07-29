@@ -7,32 +7,28 @@ from scipy.stats import norm
 import os
 # --------------------------------------------------------------------------
 # make sure you have the algorithms.py file in the current directory!
-import algorithms
+from algorithms import *
 # --------------------------------------------------------------------------
-save_dir = os.getcwd()
+
+save_dir = os.getcwd() + '/'
 
 colnames = np.array(['N','d', 'kappa', 'acc_rate', 'meanSJD', 'cpu_time', 'ESS', 'expected_B', 'acc_rate_ratio1'])
 
-def run_RWM(x, y, theta_hat, V, npost, model, kappa=2.4):
+def run_tuna(y, x, theta_hat, V, taylor_order, npost, model, implementation, kappa=1.5):
     N = x.shape[0]
     d = x.shape[1]
-    method = RWM(y, x, V, x0 = theta_hat, model=model, nburn=0, npost=npost, kappa = kappa)
-    acc_rate = method.get('acc_rate')
-    acc_rate_ratio1 = method.get('acc_rate_ratio1')
-    meanSJD = method.get('meanSJD')
-    cpu_time = method.get('cpu_time')
-    expected_B = N
-    ESS = np.max(method.get('ESS'))
-    save_results = np.array([N, d, kappa, acc_rate, meanSJD, cpu_time, ESS, expected_B, acc_rate_ratio1])
-    save_results = pd.DataFrame(save_results[None, :], columns=colnames)
+    nthin = 1000
 
-    return save_results
+    if d == 30:
+        if N == 31622:
+            chi = 9e-5
+            kappa = 0.046
+            
+        elif N == 100000:
+            chi = 8e-5
+            kappa = 0.028
 
-def run_MH_SS(x, y, theta_hat, V, taylor_order, npost, model, kappa=1.5):
-    N = x.shape[0]
-    d = x.shape[1]
-
-    method = tunaMH(y, x, V, x0 = theta_hat, model=model, control_variates=True, bound = 'new', taylor_order=taylor_order, chi=0, nburn=0, npost=npost, kappa=kappa)
+    method = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, bound = 'new', phi_function='original', taylor_order=taylor_order, model=model, chi=chi, nburn=0, npost=npost, kappa=kappa, nthin=nthin, implementation=implementation)
     acc_rate = method.get('acc_rate')
     acc_rate_ratio1 = method.get('acc_rate_ratio1')
     meanSJD = method.get('meanSJD')
@@ -44,7 +40,40 @@ def run_MH_SS(x, y, theta_hat, V, taylor_order, npost, model, kappa=1.5):
 
     return save_results
 
-def run_SMH(x, y, theta_hat, V, bound, taylor_order, npost, model):
+def run_RWM(x, y, theta_hat, V, npost, model, implementation, kappa=2.4):
+    N = x.shape[0]
+    d = x.shape[1]
+    method = RWM(y, x, V, x0 = theta_hat, model=model, nburn=0, npost=npost, kappa = kappa, implementation=implementation)
+    acc_rate = method.get('acc_rate')
+    acc_rate_ratio1 = method.get('acc_rate_ratio1')
+    meanSJD = method.get('meanSJD')
+    cpu_time = method.get('cpu_time')
+    expected_B = N
+    ESS = np.max(method.get('ESS'))
+    save_results = np.array([N, d, kappa, acc_rate, meanSJD, cpu_time, ESS, expected_B, acc_rate_ratio1])
+    save_results = pd.DataFrame(save_results[None, :], columns=colnames)
+
+    return save_results
+
+def run_MH_SS(y, x, V, theta_hat, taylor_order, npost, model, implementation, chi=0, kappa=1.5):
+    N = x.shape[0]
+    d = x.shape[1]
+    if taylor_order == 0:
+        method = MH_SS(y, x, V=V, x0 = theta_hat, model=model, control_variates=False, bound = 'original', taylor_order=taylor_order, chi=chi, nburn=0, npost=npost, kappa=kappa, implementation=implementation)    
+    else:
+        method = MH_SS(y, x, V=V, x0 = theta_hat, model=model, control_variates=True, bound = 'new', taylor_order=taylor_order, chi=chi, nburn=0, npost=npost, kappa=kappa, implementation=implementation)
+    acc_rate = method.get('acc_rate')
+    acc_rate_ratio1 = method.get('acc_rate_ratio1')
+    meanSJD = method.get('meanSJD')
+    cpu_time = method.get('cpu_time')
+    expected_B = np.mean(method.get('BoverN'))*method.get('N')
+    ESS = np.max(method.get('ESS'))
+    save_results = np.array([N, d, kappa, acc_rate, meanSJD, cpu_time, ESS, expected_B, acc_rate_ratio1])
+    save_results = pd.DataFrame(save_results[None, :], columns=colnames)
+
+    return save_results
+
+def run_SMH(x, y, theta_hat, V, bound, taylor_order, npost, model, implementation):
 
     N = x.shape[0]
     d = x.shape[1]
@@ -63,7 +92,7 @@ def run_SMH(x, y, theta_hat, V, bound, taylor_order, npost, model):
         kappa = 1.5
 
     print(kappa)
-    method = smh(y, x, V, x0 = theta_hat, model=model, kappa=kappa, bound=bound, taylor_order=taylor_order, nburn=0, npost=npost)
+    method = SMH(y, x, V, x0 = theta_hat, model=model, kappa=kappa, bound=bound, taylor_order=taylor_order, nburn=0, npost=npost,implementation=implementation)
     acc_rate = method.get('acc_rate')
     acc_rate_ratio1 = method.get('acc_rate_ratio1')
     meanSJD = method.get('meanSJD')
@@ -75,7 +104,7 @@ def run_SMH(x, y, theta_hat, V, bound, taylor_order, npost, model):
 
     return save_results
 
-def run_methods(N, d, model, rep=1, npost=10000):
+def run_methods(N, d, model, implementation, npost, rep=1):
 
     data = simulate_data(N, d, model)
     y = data.get('y')
@@ -86,40 +115,35 @@ def run_methods(N, d, model, rep=1, npost=10000):
     
     # ------------------------------------------------------------------------------------
 
-    if N == 31622 and d == 30:
-        tuna_results = run_MH_SS(y, x, V, x0 = theta_hat, control_variates=False, taylor_order=0, bound = 'new', model=model, chi=2e-5, npost=npost, kappa=0.09)
+    tuna_save_results = run_tuna(y, x, theta_hat, V, taylor_order = 0, npost=npost, model=model, implementation=implementation)
+    mhss1_save_results = run_MH_SS(y, x, theta_hat = theta_hat, V=V, taylor_order = 1, npost=npost, model=model, implementation=implementation)
+    mhss2_save_results = run_MH_SS(y, x, theta_hat = theta_hat, V=V, taylor_order = 2, npost=npost, model=model, implementation=implementation)
+    rwm_save_results = run_RWM(x, y, theta_hat, V, npost, model=model, implementation=implementation)
+    smh1_save_results = run_SMH(x, y, theta_hat, V, bound='orig', taylor_order=1, npost=npost, model=model, implementation=implementation)
+    smh2_save_results = run_SMH(x, y, theta_hat, V, bound='orig', taylor_order=2, npost=npost, model=model, implementation=implementation)
 
-    if N == 100000 and d == 30:
-        tuna_results = run_MH_SS(y, x, V, x0 = theta_hat, control_variates=False, taylor_order=0, bound = 'new', model=model, chi=2e-5, npost=npost, kappa=0.05)
-
-    tuna1_save_results = run_MH_SS(x, y, theta_hat, V, taylor_order = 1, npost=npost, model=model)
-    tuna2_save_results = run_MH_SS(x, y, theta_hat, V, taylor_order = 2, npost=npost, model=model)
-    rwm_save_results = run_RWM(x, y, theta_hat, V, npost, model=model)
-    smh1_save_results = run_SMH(x, y, theta_hat, V, bound='orig', taylor_order=1, npost=npost, model=model)
-    smh2_save_results = run_SMH(x, y, theta_hat, V, bound='orig', taylor_order=2, npost=npost, model=model)
-
-    tuna_file_name = save_dir + model + 'EfficiencyMetricsTunaTrue' + filename_end
-    tuna1_file_name = save_dir + model + 'EfficiencyMetricsTunaCV1True' + filename_end
-    tuna2_file_name = save_dir + model + 'EfficiencyMetricsTunaCV2True' + filename_end
+    tuna_file_name = save_dir + model + 'EfficiencyMetricsTuna' + filename_end
+    mhss1_file_name = save_dir + model + 'EfficiencyMetricsMHSS1' + filename_end
+    mhss2_file_name = save_dir + model + 'EfficiencyMetricsMHSS2' + filename_end
     rwm_file_name = save_dir + model + 'EfficiencyMetricsRWM' + filename_end
     smh1_file_name = save_dir + model + 'EfficiencyMetricsSMH' + filename_end
     smh2_file_name = save_dir + model + 'EfficiencyMetricsSMH2' + filename_end
 
-    save_file(tuna_results, tuna_file_name)
-    save_file(tuna1_save_results, tuna1_file_name)
-    save_file(tuna2_save_results, tuna2_file_name)
+    save_file(tuna_save_results, tuna_file_name)
+    save_file(mhss1_save_results, mhss1_file_name)
+    save_file(mhss2_save_results, mhss2_file_name)
     save_file(rwm_save_results, rwm_file_name)
     save_file(smh1_save_results, smh1_file_name)
     save_file(smh2_save_results, smh2_file_name)
 
-def run_many_times(d, npost = 100000, model = 'poisson'):
-    N = np.array([100000, 31622, 10000])
+def run_many_times(d, implementation, npost = 100000, model = 'poisson'):
+    N = np.array([100000, 31622])
     len_N = len(N)
     for j in range(len_N):
         print('N = ' + str(N[j]))
-        run_methods(N[j], d=d, model=model, npost=npost)
+        run_methods(N[j], d=d, model=model, npost=npost, implementation=implementation)
 
-run_many_times(30)
+run_many_times(30, implementation='loop')
 
 def get_results(N, model='poisson', rep=1):
 
@@ -132,9 +156,9 @@ def get_results(N, model='poisson', rep=1):
     for d in set_d:
         filename_end = "N" + str(N) + 'd' + str(d) + 'Rep' + str(rep) + '.pickle'
 
-        tuna_file_name = save_dir + model + 'EfficiencyMetricsTunaTrue' + filename_end
-        tuna1_file_name = save_dir + model + 'EfficiencyMetricsTunaCV1True' + filename_end
-        tuna2_file_name = save_dir + model + 'EfficiencyMetricsTunaCV2True' + filename_end
+        tuna_file_name = save_dir + model + 'EfficiencyMetricsTuna' + filename_end
+        mhss1_file_name = save_dir + model + 'EfficiencyMetricsMHSS1' + filename_end
+        mhss2_file_name = save_dir + model + 'EfficiencyMetricsMHSS2' + filename_end
         rwm_file_name = save_dir + model + 'EfficiencyMetricsRWM' + filename_end
         smh1_file_name = save_dir + model + 'EfficiencyMetricsSMH' + filename_end
         smh2_file_name = save_dir + model + 'EfficiencyMetricsSMH2' + filename_end
@@ -145,17 +169,17 @@ def get_results(N, model='poisson', rep=1):
                 tuna_results['method'] = 'Tuna'
                 store_results = pd.concat([store_results, tuna_results])
 
-        if os.path.exists(tuna1_file_name):
-            with open(tuna1_file_name, 'rb') as f:
-                tuna1_results = pickle.load(f)
-                tuna1_results['method'] = 'MH-SS-1'
-                store_results = pd.concat([store_results, tuna1_results])
+        if os.path.exists(mhss1_file_name):
+            with open(mhss1_file_name, 'rb') as f:
+                mhss1_results = pickle.load(f)
+                mhss1_results['method'] = 'MH-SS-1'
+                store_results = pd.concat([store_results, mhss1_results])
 
-        if os.path.exists(tuna2_file_name):
-            with open(tuna2_file_name, 'rb') as f:
-                tuna2_results = pickle.load(f)
-                tuna2_results['method'] = 'MH-SS-2'
-                store_results = pd.concat([store_results, tuna2_results])
+        if os.path.exists(mhss2_file_name):
+            with open(mhss2_file_name, 'rb') as f:
+                mhss2_results = pickle.load(f)
+                mhss2_results['method'] = 'MH-SS-2'
+                store_results = pd.concat([store_results, mhss2_results])
 
         if os.path.exists(rwm_file_name):
             with open(rwm_file_name, 'rb') as f:

@@ -1,9 +1,7 @@
 import time 
 import numpy as np
-import random
 from tqdm import tqdm
 import statsmodels.api as sm
-import cProfile
 import scipy.stats as scs
 import scipy.special as sc
 import tensorflow as tf
@@ -489,7 +487,7 @@ def get_theta_hat_and_var_cov_matrix(model, x, y, x0=None, basic_lr=None, iter_m
     
     return theta_hat, V
 
-def RWM(y, x, V, x0, model, nburn, npost, kappa = 2.4):
+def RWM(y, x, V, x0, model, nburn, npost, implementation, kappa = 2.4):
 
     n = len(y)
     d = len(x0)
@@ -513,7 +511,11 @@ def RWM(y, x, V, x0, model, nburn, npost, kappa = 2.4):
         log_target_i = poisson_log_target_i
     
     U = lambda theta: -log_target_i(theta, y, x)
+    U_j = lambda theta, idx: -log_target_i(theta, y[idx, True], x[idx, :])
+
     start_time = time.time()
+
+    U_theta = np.sum(U(theta))
 
     for i in tqdm(range(nmcmc), desc='Running', ncols=75):
 
@@ -521,9 +523,17 @@ def RWM(y, x, V, x0, model, nburn, npost, kappa = 2.4):
         theta_prime = multivariate_norm(theta, cholesky_dec, d)
 
         # Metropolis-Hastings ratio
-        r = np.sum(U(theta) - U(theta_prime))
+        if implementation == 'vectorised':
+            U_theta_prime = np.sum(U(theta_prime))
+            r = U_theta - U_theta_prime
+        elif implementation == 'loop':
+            U_theta_prime = 0
+            for j in range(n):
+                U_theta_prime = U_theta_prime + U_j(theta_prime, j)
+            r = U_theta - U_theta_prime
 
         if np.random.exponential() > -r:
+            U_theta = U_theta_prime*1
             aux_theta_SJD = theta
             theta = theta_prime
             if i >= nburn:
@@ -588,7 +598,7 @@ def get_phi_theta_theta_prime(theta, theta_prime, theta_hat, bound, taylor_order
 
     return phi_theta_theta_prime
 
-def smh(y, x, V, x0, kappa, bound, model, taylor_order = 1, nburn=1000, npost=1000, control_variates = True):
+def SMH(y, x, V, x0, kappa, bound, model, implementation, taylor_order = 1, nburn=1000, npost=1000, control_variates = True, nthin = 1):
     # Pre-processing (control variates)
     n = len(y)
     d = len(x0)
@@ -600,9 +610,10 @@ def smh(y, x, V, x0, kappa, bound, model, taylor_order = 1, nburn=1000, npost=10
     psi = get_psi(model, x, y, bound, taylor_order)
     # MCMC details
     nmcmc = nburn + npost
-    store_samples = np.zeros((npost, d))
+    store_size = int(npost/nthin)
+    store_samples = np.zeros((store_size, d))
+    save_B = np.zeros((store_size, 1))
     store_samples[:] = np.nan
-    save_B = np.zeros((npost, 1))
     save_B[:] = np.nan
     aux_idx = 0
     acceptance_rate = 0
@@ -694,19 +705,20 @@ def smh(y, x, V, x0, kappa, bound, model, taylor_order = 1, nburn=1000, npost=10
 
                 # See Algorithm 1 (Bj ~ Bernoulli(lambda/lambda_bar))
                 lambda_bar_i = phi_theta_theta_prime * psi[subsample_idx]
-
-                if any(np.random.uniform(0, 1, B) < lambda_i/lambda_bar_i):
-                    reject_theta_prime = True
-
-                # for k in subsample_idx:
-                #     # Acceptance probability (PART 2): see right-hand side of equation 10 (i.e., prod_i (1 ^ tilde(pi)_i(theta') * hat(pi)_k,i(theta)...))
-                #     lambda_i = U(theta_prime, k) - U(theta, k)
-                #     # See Algorithm 1 (Bj ~ Bernoulli(lambda/lambda_bar))
-                #     lambda_bar_i = phi_theta_theta_prime * psi[k]
-                        
-                #     if np.random.uniform(0, 1, 1) < lambda_i/lambda_bar_i:
-                #         reject_theta_prime = True
-                #         break
+                
+                if implementation == 'vectorised':
+                    if any(np.random.uniform(0, 1, B) < lambda_i/lambda_bar_i):
+                        reject_theta_prime = True
+                elif implementation == 'loop':
+                    for k in subsample_idx:
+                        # Acceptance probability (PART 2): see right-hand side of equation 10 (i.e., prod_i (1 ^ tilde(pi)_i(theta') * hat(pi)_k,i(theta)...))
+                        lambda_i = U(theta_prime, k) - U(theta, k)
+                        # See Algorithm 1 (Bj ~ Bernoulli(lambda/lambda_bar))
+                        lambda_bar_i = phi_theta_theta_prime * psi[k]
+                            
+                        if np.random.uniform(0, 1, 1) < lambda_i/lambda_bar_i:
+                            reject_theta_prime = True
+                            break
 
                 if reject_theta_prime == False:
                     aux_theta_SJD = theta
@@ -715,9 +727,10 @@ def smh(y, x, V, x0, kappa, bound, model, taylor_order = 1, nburn=1000, npost=10
                         acceptance_rate = acceptance_rate + 1
                         sum_SJD = sum_SJD + L2_norm_vector(aux_theta_SJD - theta_prime)**2
 
-        if i >= nburn:
-            store_samples[i - nburn, :] = theta
-            save_B[i-nburn, :] = B
+        if i >= nburn and ((i-nburn)%nthin == 0):
+            curr_idx = int((i-nburn)/nthin)
+            store_samples[curr_idx, :] = theta
+            save_B[curr_idx, :] = B
 
     cpu_time = time.time() - start_time
 
@@ -733,14 +746,14 @@ def smh(y, x, V, x0, kappa, bound, model, taylor_order = 1, nburn=1000, npost=10
             'N': n,
             'd': d}
 
-def tunaMH(y, x, V, x0, chi, nburn, npost, control_variates, bound, model, taylor_order=1, phi_function = 'min', kappa = 1.5):
+def MH_SS(y, x, V, x0, chi, nburn, npost, control_variates, bound, model, implementation, taylor_order=1, phi_function = 'min', kappa = 1.5, nthin = 1):
 
     n = len(y)
     d = len(x0)
-
     nmcmc = nburn + npost
-    save_parameters = np.zeros((npost, d))
-    save_B = np.zeros((npost, 1))
+    store_size = int(npost/nthin)
+    save_parameters = np.zeros((store_size, d))
+    save_B = np.zeros((store_size, 1))
     save_lambda = 0
 
     acceptance_rate = 0
@@ -848,11 +861,12 @@ def tunaMH(y, x, V, x0, chi, nburn, npost, control_variates, bound, model, taylo
                 I = np.where(np.random.uniform(0, 1, n_obs_bundled) < prob_add_to_I)[0]
 
                 # Metropolis-Hastings ratio; see Algorithm 4 on page 21
-                r = np.sum(np.log((_lambda*c_i_subsample[I] + C * phi_prime[I])/(_lambda*c_i_subsample[I] + C * phi[I])))
-                
-                # r = 0
-                # for j in I:
-                #     r = r + np.sum(np.log((_lambda*c_i_subsample[j] + C * phi_prime[j])/(_lambda*c_i_subsample[j] + C * phi[j])))
+                if implementation == 'vectorised':
+                    r = np.sum(np.log((_lambda*c_i_subsample[I] + C * phi_prime[I])/(_lambda*c_i_subsample[I] + C * phi[I])))
+                elif implementation == 'loop':
+                    r = 0
+                    for j in I:
+                        r = r + np.sum(np.log((_lambda*c_i_subsample[j] + C * phi_prime[j])/(_lambda*c_i_subsample[j] + C * phi[j])))
 
             else:
                 r = -np.Inf # i.e., reject theta_prime
@@ -864,9 +878,10 @@ def tunaMH(y, x, V, x0, chi, nburn, npost, control_variates, bound, model, taylo
                 acceptance_rate = acceptance_rate + 1
                 sum_SJD = sum_SJD + L2_norm_vector(aux_theta_SJD - theta_prime)**2
                 
-        if i >= nburn:
-            save_parameters[i-nburn, :] = theta
-            save_B[i-nburn, :] = B
+        if i >= nburn and ((i-nburn)%nthin == 0):
+            curr_idx = int((i-nburn)/nthin)
+            save_parameters[curr_idx, :] = theta
+            save_B[curr_idx, :] = B
             save_lambda = save_lambda + _lambda
     
     cpu_time = time.time() - start_time
@@ -884,3 +899,4 @@ def tunaMH(y, x, V, x0, chi, nburn, npost, control_variates, bound, model, taylo
             'N': n,
             'd': d,
             'lambda': save_lambda/npost}
+

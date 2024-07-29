@@ -7,13 +7,14 @@ from scipy.stats import norm
 import os
 # --------------------------------------------------------------------------
 # make sure you have the algorithms.py file in the current directory!
-import algorithms 
+from algorithms import *
 # --------------------------------------------------------------------------
-save_dir = os.getcwd()
+
+save_dir = os.getcwd() + '/'
 
 colnames = np.array(['N','d', 'kappa', 'acc_rate', 'meanSJD', 'cpu_time', 'ESS', 'expected_B', 'acc_rate_ratio1'])
 
-def run_tuna(x, y, theta_hat, V, taylor_order, npost, model, kappa=1.5):
+def run_tuna(x, y, theta_hat, V, taylor_order, npost, model, implementation, kappa=1.5):
     N = x.shape[0]
     d = x.shape[1]
 
@@ -40,7 +41,7 @@ def run_tuna(x, y, theta_hat, V, taylor_order, npost, model, kappa=1.5):
             chi = 1e-5
             kappa = 0.1
 
-    method = tunaMH(y, x, V, x0 = theta_hat, model=model, control_variates=False, taylor_order = 0, bound = 'new', chi=chi, nburn=0, npost=npost, kappa=kappa)
+    method = MH_SS(y, x, V, x0 = theta_hat, model=model, control_variates=False, taylor_order = taylor_order, bound = 'new', chi=chi, nburn=0, npost=npost, kappa=kappa,implementation=implementation)
     acc_rate = method.get('acc_rate')
     acc_rate_ratio1 = method.get('acc_rate_ratio1')
     meanSJD = method.get('meanSJD')
@@ -52,10 +53,10 @@ def run_tuna(x, y, theta_hat, V, taylor_order, npost, model, kappa=1.5):
 
     return save_results
 
-def run_RWM(x, y, theta_hat, V, npost, model, kappa=2.4):
+def run_RWM(x, y, theta_hat, V, npost, model, implementation, kappa=2.4):
     N = x.shape[0]
     d = x.shape[1]
-    method = RWM(y, x, V, x0 = theta_hat, model=model, nburn=0, npost=npost, kappa = kappa)
+    method = RWM(y, x, V, x0 = theta_hat, model=model, nburn=0, npost=npost, kappa = kappa, implementation=implementation)
     acc_rate = method.get('acc_rate')
     acc_rate_ratio1 = method.get('acc_rate_ratio1')
     meanSJD = method.get('meanSJD')
@@ -67,7 +68,7 @@ def run_RWM(x, y, theta_hat, V, npost, model, kappa=2.4):
 
     return save_results
 
-def run_SMH(x, y, theta_hat, V, bound, taylor_order, npost, model):
+def run_SMH(x, y, theta_hat, V, bound, taylor_order, npost, model, implementation):
     
     N = x.shape[0]
     d = x.shape[1]
@@ -88,7 +89,7 @@ def run_SMH(x, y, theta_hat, V, bound, taylor_order, npost, model):
         kappa = 0.65
 
     print(kappa)
-    method = smh(y, x, V, x0 = theta_hat, model=model, kappa=kappa, bound=bound, taylor_order=taylor_order, nburn=0, npost=npost)
+    method = SMH(y, x, V, x0 = theta_hat, model=model, kappa=kappa, bound=bound, taylor_order=taylor_order, nburn=0, npost=npost,implementation=implementation)
     acc_rate = method.get('acc_rate')
     acc_rate_ratio1 = method.get('acc_rate_ratio1')
     meanSJD = method.get('meanSJD')
@@ -100,7 +101,9 @@ def run_SMH(x, y, theta_hat, V, bound, taylor_order, npost, model):
 
     return save_results
 
-def run_methods(N, d, model, rep=1, npost=10000):
+def run_methods(N, d, model, implementation='loop', npost=100000):
+
+    npost_tuna = 100
 
     data = simulate_data(N, d, model)
     y = data.get('y')
@@ -109,11 +112,11 @@ def run_methods(N, d, model, rep=1, npost=10000):
     theta_hat, V = get_theta_hat_and_var_cov_matrix(model, x, y)
 
     filename_beg = save_dir + model + 'Related_works'
-    filename_end = "N" + str(N) + 'd' + str(d) + 'Rep' + str(rep) + '.pickle'
+    filename_end = "N" + str(N) + 'd' + str(d) + '.pickle'
 
-    tuna = run_tuna(x, y, theta_hat, V, taylor_order = 1, npost=npost, model=model)
-    smh1 = run_SMH(x,  y, theta_hat, V, taylor_order = 1, npost=npost, model=model, bound='orig')
-    rwm  = run_RWM(x,  y, theta_hat, V, npost = npost, model=model)
+    tuna = run_tuna(x, y, theta_hat, V, taylor_order = 0, npost=npost_tuna, model=model, implementation=implementation)
+    smh1 = run_SMH(x,  y, theta_hat, V, taylor_order = 1, npost=npost, model=model, bound='orig', implementation=implementation)
+    rwm  = run_RWM(x,  y, theta_hat, V, npost = npost, model=model, implementation=implementation)
 
     tuna_file_name = filename_beg + 'Tuna' + filename_end
     smh1_file_name = filename_beg + 'SMH1' + filename_end
@@ -123,26 +126,24 @@ def run_methods(N, d, model, rep=1, npost=10000):
     save_file(rwm,   rwm_file_name)
     save_file(smh1,  smh1_file_name)
 
-def simulation(d, npost, model = 'logistic'):
+def simulation(d, model = 'logistic'):
     N = np.array([31622])
     len_N = len(N)
     for j in range(len_N):
         print('N = ' + str(N[j]))
-        run_methods(N[j], d=d, model=model, npost=npost)
+        run_methods(N[j], d=d, model=model)
 
-simulation(1, npost=100000)
-simulation(2, npost=100000)
-simulation(5, npost=100000)
-simulation(10, npost=100000)
-simulation(20, npost=100000)
-simulation(30, npost=100000)
-simulation(40, npost=100000)
-simulation(50, npost=100000)
-simulation(60, npost=100000)
+simulation(5)
+simulation(10)
+simulation(20)
+simulation(30)
+simulation(40)
+simulation(50)
+simulation(60)
 
-def get_results(N, model='logistic', rep=1):
+def get_results(N, model='logistic'):
 
-    set_d = np.array([1, 2, 5, 10, 20, 30, 40, 50, 60])
+    set_d = np.array([5, 10, 20, 30, 40, 50, 60])
     colnames = np.array(['N','d', 'kappa', 'acc_rate', 'meanSJD', 'cpu_time', 'ESS', 'expected_B', 'method', 'acc_rate_ratio1'])
     store_results = np.zeros((len(set_d), len(colnames)))
     store_results[:] = np.nan
@@ -150,7 +151,7 @@ def get_results(N, model='logistic', rep=1):
 
     for d in set_d:
         filename_beg = save_dir + model + 'Related_works'
-        filename_end = "N" + str(N) + 'd' + str(d) + 'Rep' + str(rep) + '.pickle'
+        filename_end = "N" + str(N) + 'd' + str(d) + '.pickle'
 
         tuna_file_name = filename_beg + 'Tuna' + filename_end
         rwm_file_name = filename_beg + 'RWM' + filename_end
@@ -274,31 +275,3 @@ theme(plot_title = element_text(size = 30, hjust = 0.5),
     )
 
 plot.save('related_works_acc_rate.pdf', height=height_plot, width=width_plot)
-
-# -------------------------------------------------
-# Figure 8 (c)
-# -------------------------------------------------
-
-plot = (ggplot(sim_results) + 
- aes(x='d', y='acc_rate', colour='method') +  
-    geom_line(linetype = "dashed", size=2) +
-    geom_point(aes(shape = 'method'), size=6) +
-    geom_segment(aes(x = 0, xend = 60, y = 0.234, yend = 0.234), colour='#FB9A99', size=0.4, linetype='dotted') +
-    geom_segment(aes(x = 0, xend = 60, y = 0.45, yend = 0.45), colour='#1F78B4', size=0.4, linetype='dotted') +
-    ylim(0.2, 0.63) +
- labs(
-      y = 'Acceptance rate',
-    #   x = r'log$_{10} N$'
-      x = 'd'
-      ) + 
-theme_bw(base_size = 25) +
-theme(plot_title = element_text(size = 25, hjust = 0.5),
-    strip_text_y = element_text(angle = 0),
-    legend_position = 'bottom',
-    legend_title = element_blank(),
-    panel_grid_major = element_blank(),
-    panel_grid_minor = element_blank()) +
-    scale_color_manual(values=["#A6CEE3", "#1F78B4", "#FB9A99"])
-    )
-
-plot.save('optimal_scaling_acc_rate_d.pdf', height=height_plot, width=width_plot)

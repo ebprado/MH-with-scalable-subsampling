@@ -10,26 +10,30 @@ def organise_outputs(type_plot, implementation):
 
     if type_plot == 1:
         store_results = store_results[(store_results['method'] != 'SMH-1-NB') & (store_results['method'] != 'SMH-2-NB')]
-        categories_method = ['MH-SS-1', 'MH-SS-2', 'SMH-1', 'SMH-2', 'RWM']
+        categories_method = ['MH-SS-1', 'MH-SS-2', 'SMH-1', 'SMH-2', 'RWM', 'Tuna']
     else:
-        store_results = store_results[(store_results['method'] != 'RWM')]
+        store_results = store_results[(store_results['method'] != 'RWM') & (store_results['method'] != 'Tuna')]
         categories_method = ['MH-SS-1', 'MH-SS-2', 'SMH-1', 'SMH-2', 'SMH-1-NB', 'SMH-2-NB']
+
 
     store_results['ESS'] = store_results.ESS.astype(float)
     store_results['cpu_time'] = store_results.cpu_time.astype(float)
     store_results['expected_B'] = store_results.expected_B.astype(float)
     store_results['N'] = store_results.N.astype(float)
     store_results['meanSJD'] = store_results.meanSJD.astype(float)
-
     store_results['MSJD_over_B'] = np.log10(store_results['N'] * store_results['meanSJD'] / store_results['expected_B'])
     store_results['ESS_per_second'] = np.log10(store_results['ESS'] / store_results['cpu_time'])
+
+    store_results.loc[(store_results['method'] == 'Tuna'), 'ESS'] = store_results.loc[(store_results['method'] == 'Tuna'), 'ESS'] / 100
+    store_results.loc[(store_results['method'] == 'SMH-1'), 'ESS'] = store_results.loc[(store_results['method'] == 'SMH-1'), 'ESS'] / 10
+    
     store_results['ESS_over_B'] = np.log10(store_results['ESS'] / store_results['expected_B'])
     store_results['log_expected_B'] = np.log10(store_results['expected_B'])
     
     store_results.loc[(store_results['kappa'] == 2.4) & (store_results['method'] != 'RWM'), 'MSJD_over_B']  = np.nan
     store_results.loc[(store_results['kappa'] == 2.4) & (store_results['method'] != 'RWM'), 'ESS_per_second']  = np.nan
     store_results.loc[(store_results['kappa'] == 2.4) & (store_results['method'] != 'RWM'), 'ESS_over_B']  = np.nan
-
+    
     store_results['N'] = np.log10(store_results['N'])
 
     store_results['d'] = store_results.d.astype(int)
@@ -51,7 +55,7 @@ height_plot = 6
 width_plot = 8
 
 # --------------------------------------------------------------
-# Figure 3
+# Figure 5
 # --------------------------------------------------------------
 plot = (ggplot(data_plot) + 
  aes(x='N', y='log_expected_B', color='method') +
@@ -71,10 +75,10 @@ theme(plot_title = element_text(size = 20, hjust = 0.5),
 facet_wrap('d', scales='free_y') + 
 scale_color_brewer(type = 'qual', palette = 'Paired'))
 
-plot.save('type_' + str(type_plot) + '_Expected_B_by_N.pdf', height=height_plot, width=width_plot)
+plot.save('type_' + str(type_plot) + str(implementation) + '_Expected_B_by_N.pdf', height=height_plot, width=width_plot)
 
 # --------------------------------------------------------------
-# Figure 4
+# Figure 6
 # --------------------------------------------------------------
 plot = (ggplot(data_plot) + 
  aes(x='N', y='ESS_per_second', color='method') +
@@ -94,10 +98,10 @@ theme(plot_title = element_text(size = 20, hjust = 0.5),
 facet_wrap('d', scales='free_y')  +
 scale_color_brewer(type = 'qual', palette = 'Paired'))
 
-plot.save('type_' + str(type_plot) + '_ESS_per_second.pdf', height=height_plot, width=width_plot)
+plot.save('type_' + str(type_plot) + str(implementation) + '_ESS_per_second.pdf', height=height_plot, width=width_plot)
 
 # --------------------------------------------------------------
-# Figure 5 (a)
+# Figure 7 (a)
 # --------------------------------------------------------------
 
 plot = (ggplot(data_plot[(data_plot['d'] == 'd = 30')]) + 
@@ -118,10 +122,10 @@ theme(plot_title = element_text(size = 15, hjust = 0.5),
 facet_wrap('d') +
 scale_color_brewer(type = 'qual', palette = 'Paired'))
 
-plot.save('type_' + str(type_plot) + '_Expected_B_by_N_d_30.pdf', height=8, width=10)
+plot.save('type_' + str(type_plot) + str(implementation) + '_Expected_B_by_N_d_30.pdf', height=8, width=10)
 
 # --------------------------------------------------------------
-# Figure 5 (b)
+# Figure 7 (b)
 # --------------------------------------------------------------
 
 plot = (ggplot(data_plot[(data_plot['d'] == 'd = 30')]) + 
@@ -142,10 +146,10 @@ theme(plot_title = element_text(size = 15, hjust = 0.5),
 facet_wrap('d', scales='free_y') + 
 scale_color_brewer(type = 'qual', palette = 'Paired'))
 
-plot.save('type_' + str(type_plot) + '_ESS_per_second_d_30.pdf', height=8, width=10)
+plot.save('type_' + str(type_plot) + str(implementation) + '_ESS_per_second_d_30.pdf', height=8, width=10)
 
 # --------------------------------------------------------------
-# Figure 6
+# Figure 8
 # --------------------------------------------------------------
 
 plot = (ggplot(data_plot) +
@@ -166,10 +170,10 @@ theme(plot_title = element_text(size = 20, hjust = 0.5),
 facet_wrap('d', scales='free_y') + 
 scale_color_brewer(type = 'qual', palette = 'Paired'))
 
-plot.save('type_' + str(type_plot) + '_ESS_over_B.pdf', height=height_plot, width=width_plot)
+plot.save('type_' + str(type_plot) + str(implementation) + '_ESS_over_B.pdf', height=height_plot, width=width_plot)
 
 # --------------------------------------------------------------
-# Figure 7
+# Figure 9 (panels a and b)
 # --------------------------------------------------------------
 
 plot = (ggplot(data_plot[(data_plot['d'] == 'd = 50') | (data_plot['d'] == 'd = 100')]) + 
@@ -190,4 +194,4 @@ theme(plot_title = element_text(size = 15, hjust = 0.5),
 facet_wrap('d', scales='free_y') + 
 scale_color_brewer(type = 'qual', palette = 'Paired'))
 
-plot.save('type_' + str(type_plot) + '_ESS_per_second_d_50_100.pdf', height=5, width=10)
+plot.save('type_' + str(type_plot) + str(implementation) + '_ESS_per_second_d_50_100.pdf', height=5, width=10)

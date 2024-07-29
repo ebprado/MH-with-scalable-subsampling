@@ -7,12 +7,11 @@ from scipy.stats import norm
 import os
 # --------------------------------------------------------------------------
 # make sure you have the algorithms.py file in the current directory!
-import algorithms 
+from algorithms import *
 # --------------------------------------------------------------------------
-save_dir = os.getcwd()
+save_dir = os.getcwd() + '/'
 
-
-def run_tunaMH(N, d, cv, chi = -1, npost=100000, rep = 10, model = 'logistic'):
+def run_MH_SS(N, d, cv, chi = -1, npost=100000, rep = 10, model = 'logistic', implementation='loop'):
     
     for k in range(rep):
         print(str(k + 1) + ' out of ' + str(rep))
@@ -27,9 +26,9 @@ def run_tunaMH(N, d, cv, chi = -1, npost=100000, rep = 10, model = 'logistic'):
 
         if cv == True:
 
-            mh_ss_min_cv1 = tunaMH(y, x, V, x0 = theta_hat, control_variates=cv, bound = 'new', model=model, phi_function = 'min', taylor_order = 1, chi=0, nburn=0, npost=npost)
-            mh_ss_max_cv1 = tunaMH(y, x, V, x0 = theta_hat, control_variates=cv, bound = 'new', model=model, phi_function = 'max', taylor_order = 1, chi=0, nburn=0, npost=npost)
-            mh_ss_ori_cv1 = tunaMH(y, x, V, x0 = theta_hat, control_variates=cv, bound = 'new', model=model, phi_function = 'original', taylor_order = 1, chi=0, nburn=0, npost=npost)
+            mh_ss_min_cv1 = MH_SS(y, x, V, x0 = theta_hat, control_variates=cv, bound = 'new', model=model, phi_function = 'min', taylor_order = 1, chi=0, nburn=0, npost=npost, implementation=implementation)
+            mh_ss_max_cv1 = MH_SS(y, x, V, x0 = theta_hat, control_variates=cv, bound = 'new', model=model, phi_function = 'max', taylor_order = 1, chi=0, nburn=0, npost=npost, implementation=implementation)
+            mh_ss_ori_cv1 = MH_SS(y, x, V, x0 = theta_hat, control_variates=cv, bound = 'new', model=model, phi_function = 'original', taylor_order = 1, chi=0, nburn=0, npost=npost, implementation=implementation)
 
             chi = 0
 
@@ -37,16 +36,18 @@ def run_tunaMH(N, d, cv, chi = -1, npost=100000, rep = 10, model = 'logistic'):
             acc_rate_max_cv1 = mh_ss_max_cv1.get('acc_rate')
             acc_rate_ori_cv1 = mh_ss_ori_cv1.get('acc_rate')
             
-            save_results_cv1 = np.array(['Tuna+CV-1', N, d, chi, acc_rate_min_cv1, acc_rate_max_cv1, acc_rate_ori_cv1])
+            save_results_cv1 = np.array(['MH-SS-1', N, d, chi, acc_rate_min_cv1, acc_rate_max_cv1, acc_rate_ori_cv1])
 
-            save_results = pd.DataFrame(save_results_cv1, columns=colnames)
-            file_name = save_dir + 'TunaPhiComparisonCV' + str(cv) + "N" + str(N) + 'd' + str(d) + 'rep' + str(k) + '.pickle'
+            save_results = pd.DataFrame(save_results_cv1[None], columns=colnames)
+            file_name = save_dir + 'PhiComparisonCV' + str(cv) + "N" + str(N) + 'd' + str(d) + 'rep' + str(k) + '.pickle'
 
-        else:
+        else: 
 
-            tuna_min = tunaMH(y, x, V, x0 = theta_hat, control_variates=False, bound='', model=model,  phi_function = 'min', chi=chi, nburn=0, npost=npost)
-            tuna_max = tunaMH(y, x, V, x0 = theta_hat, control_variates=False, bound='', model=model,  phi_function = 'max', chi=chi, nburn=0, npost=npost)
-            tuna_ori = tunaMH(y, x, V, x0 = theta_hat, control_variates=False, bound='', model=model,  phi_function = 'original', chi=chi, nburn=0, npost=npost)
+            # Tuna = MH-SS without control variates and phi_function = 'original'
+
+            tuna_min = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, bound='', model=model,  phi_function = 'min', chi=chi, nburn=0, npost=npost)
+            tuna_max = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, bound='', model=model,  phi_function = 'max', chi=chi, nburn=0, npost=npost)
+            tuna_ori = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, bound='', model=model,  phi_function = 'original', chi=chi, nburn=0, npost=npost)
 
             acc_rate_min = tuna_min.get('acc_rate')
             acc_rate_max = tuna_max.get('acc_rate')
@@ -54,28 +55,28 @@ def run_tunaMH(N, d, cv, chi = -1, npost=100000, rep = 10, model = 'logistic'):
 
             save_results = np.array(['Tuna', N, d, chi, acc_rate_min, acc_rate_max, acc_rate_ori])
             save_results = pd.DataFrame(save_results[None], columns=colnames)
-            file_name = save_dir + 'TunaPhiComparisonCV' + str(cv) + "N" + str(N) + 'd' + str(d) + 'rep' + str(k) + '.pickle'
+            file_name = save_dir + 'PhiComparisonCV' + str(cv) + "N" + str(N) + 'd' + str(d) + 'rep' + str(k) + '.pickle'
 
         with open(file_name, 'wb') as f:
             pickle.dump(save_results, f, pickle.HIGHEST_PROTOCOL)
 
-run_tunaMH(1000, 5, cv=True)
-run_tunaMH(1000, 15, cv=True)
-run_tunaMH(1000, 30, cv=True)
-run_tunaMH(1000, 50, cv=True)
-run_tunaMH(1000, 100, cv=True)
+run_MH_SS(1000, 5, cv=True)
+run_MH_SS(1000, 15, cv=True)
+run_MH_SS(1000, 30, cv=True)
+run_MH_SS(1000, 50, cv=True)
+run_MH_SS(1000, 100, cv=True)
 
-run_tunaMH(10000, 5, cv=True)
-run_tunaMH(10000, 15, cv=True)
-run_tunaMH(10000, 30, cv=True)
-run_tunaMH(10000, 50, cv=True)
-run_tunaMH(10000, 100, cv=True)
+run_MH_SS(10000, 5, cv=True)
+run_MH_SS(10000, 15, cv=True)
+run_MH_SS(10000, 30, cv=True)
+run_MH_SS(10000, 50, cv=True)
+run_MH_SS(10000, 100, cv=True)
             
-run_tunaMH(100000, 5, cv=True)
-run_tunaMH(100000, 15, cv=True)
-run_tunaMH(100000, 30, cv=True)
-run_tunaMH(100000, 50, cv=True)
-run_tunaMH(100000, 100, cv=True)
+run_MH_SS(100000, 5, cv=True)
+run_MH_SS(100000, 15, cv=True)
+run_MH_SS(100000, 30, cv=True)
+run_MH_SS(100000, 50, cv=True)
+run_MH_SS(100000, 100, cv=True)
 
 def get_acc_rates(N, cv=True, rep=10):
 
@@ -87,7 +88,7 @@ def get_acc_rates(N, cv=True, rep=10):
 
     for d in set_d:
         for k in range(rep):
-            file_name = save_dir + 'TunaPhiComparisonCV' + str(cv) + "N" + str(N) + 'd' + str(d) + 'rep' + str(k) + '.pickle'
+            file_name = save_dir + 'PhiComparisonCV' + str(cv) + "N" + str(N) + 'd' + str(d) + 'rep' + str(k) + '.pickle'
 
             if os.path.exists(file_name):
                 with open(file_name, 'rb') as f:
@@ -123,8 +124,6 @@ test2_cv = get_acc_rates(10000, cv=True)
 test3_cv = get_acc_rates(100000, cv=True)
 
 test_cv = pd.concat([test1_cv, test2_cv, test3_cv])
-test_cv = test_cv.query("N != 'n = 1000' or d != '100'")
-test_cv = test_cv.query("N != 'n = 1000' or d != '50' or method != 'Tuna+CV-2'")
 
 # --------------------------------------------------------------
 # Figure 2
