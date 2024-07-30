@@ -60,7 +60,7 @@ vector_loop = 'loop'
 # ------------------------------------------------------------------------------------
 # Tuna
 # ------------------------------------------------------------------------------------
-tuna = tunaMH(y, x, V, x0 = theta_hat, control_variates=False, bound = 'new', model=model, phi_function = 'original', chi=1e-5, nburn=nburn, npost=npost, kappa=0.013)
+tuna = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, bound = 'new', model=model, phi_function = 'original', chi=1e-5, nburn=nburn, npost=npost, kappa=0.013, implementation=vector_loop)
 
 # ------------------------------------------------------------------------------------
 # MH-SS, SMH and RWM
