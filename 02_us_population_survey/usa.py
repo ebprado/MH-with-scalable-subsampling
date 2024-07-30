@@ -101,11 +101,11 @@ tuna = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, bound = 'new', mod
 # ------------------------------------------------------------------------------------
 # MH-SS, SMH and RWM
 # ------------------------------------------------------------------------------------
-mhss1 = MH_SS(y, x, V, x0 = theta_hat, control_variates=True, taylor_order=1, bound = 'new', model=model, chi=0, nburn=nburn, npost=npost, kappa=1.5)
-mhss2 = MH_SS(y, x, V, x0 = theta_hat, control_variates=True, taylor_order=2, bound = 'new', model=model, chi=0, nburn=nburn, npost=npost, kappa=1.5)
-smh1 = SMH(y, x, V, x0=theta_hat, kappa=1, bound='orig', taylor_order = 1, model=model, nburn=nburn, npost=npost)
-smh2 = SMH(y, x, V, x0=theta_hat, kappa=2, bound='orig', taylor_order = 2, model=model, nburn=nburn, npost=npost)
-rwm = RWM(y, x, V, x0=theta_hat, model=model, nburn=nburn, npost=npost, kappa = 2.4)
+mhss1 = MH_SS(y, x, V, x0 = theta_hat, control_variates=True, taylor_order=1, bound = 'new', model=model, chi=0, nburn=nburn, npost=npost, kappa=1.5, implementation=vector_loop)
+mhss2 = MH_SS(y, x, V, x0 = theta_hat, control_variates=True, taylor_order=2, bound = 'new', model=model, chi=0, nburn=nburn, npost=npost, kappa=1.5, implementation=vector_loop)
+smh1 = SMH(y, x, V, x0=theta_hat, kappa=1, bound='orig', taylor_order = 1, model=model, nburn=nburn, npost=npost, implementation=vector_loop)
+smh2 = SMH(y, x, V, x0=theta_hat, kappa=2, bound='orig', taylor_order = 2, model=model, nburn=nburn, npost=npost, implementation=vector_loop)
+rwm = RWM(y, x, V, x0=theta_hat, model=model, nburn=nburn, npost=npost, kappa = 2.4, implementation=vector_loop)
 
 tuna_file_name = str(dataset) + model + vector_loop + '_Tuna' + '.pickle'
 mhss1_file_name = str(dataset) + model + vector_loop + '_mhss1' + '.pickle'
