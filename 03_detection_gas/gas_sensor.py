@@ -65,12 +65,13 @@ V = open_file(V_file_name)
 
 nburn = 0
 npost = 100000
+npost_tuna = 100000000
 vector_loop = 'loop'
 
 # ------------------------------------------------------------------------------------
 # Tuna (only for logistic and poisson regression)
 # ------------------------------------------------------------------------------------
-tuna = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, bound = 'new', model=model, phi_function = 'original', chi=7e-6, nburn=nburn, npost=npost, kappa=0.025, implementation=vector_loop)
+tuna = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, bound = 'new', model=model, phi_function = 'original', chi=7e-6, nburn=nburn, npost=npost_tuna, kappa=0.025, implementation=vector_loop)
 tuna.get('lambda')
 tuna.get('acc_rate')
 
