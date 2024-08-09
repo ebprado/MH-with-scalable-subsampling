@@ -47,13 +47,13 @@ pip install -i https://test.pypi.org/simple/ mhssteste
   
 * `06_Figure_10.py`: Acceptance rates and mean squared jumping distance (MSJD) over E(B) based on a simulation experiment with a logistic regression model with dimension $d = 100$ and $n=100,000$.
 
-### U.S. population survey
+### U.S. population survey: 
 
-### Detection gas
+### Detection gas:
 
-### Hepmass
+### Hepmass:
 
-### Road casualties UK
+### Road casualties UK: 
 
 
 ### mhssteste:
