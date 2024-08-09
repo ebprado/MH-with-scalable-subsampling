@@ -30,6 +30,16 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 # Repository Folder Structure
 
 ### Simulation experiments:
+
+* `01_Figure_1.py` 
+02_Figure_2.py
+03_Figures_3_and_4.py
+03_aux_generate_results.py
+04_Figures_5_6_7_8_9.py
+04_aux_generate_results.py
+05_Table_1.py
+06_Figure_10.py
+
    * "Chilbolton_Case_Study" contains all the notebooks for the case study. Corresponds to Section 5 in the main paper and Supplementary Material B.2.
 
         * "Data Processing" shows how the Chilbolton dataset was cleaned and formatted for the case study. Corresponds to Supplementary Material B.2.1.
