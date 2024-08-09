@@ -31,14 +31,21 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 
 ### Simulation experiments:
 
-* `01_Figure_1.py` generates acceptance rates and ESS per second for SMH-1, Tuna and RWM. The results are based on synthetic datasets generated from a logistic regression model with $n = 10^{4.5} \approx 30,000$ observations.
-02_Figure_2.py
-03_Figures_3_and_4.py
-03_aux_generate_results.py
-04_Figures_5_6_7_8_9.py
-04_aux_generate_results.py
-05_Table_1.py
-06_Figure_10.py
+* `01_Figure_1.py`: acceptance rates and ESS per second for SMH-1, Tuna and RWM. The results are based on synthetic datasets generated from a logistic regression model with $n = 10^{4.5} \approx 30,000$ observations.
+
+* `02_Figure_2.py`: acceptance rates of the proposed method with first-order control variates. For each combination of $\gamma$, $n$ and $d$, $10$ synthetic datasets are generated from a logistic regression model.
+
+*03_aux_generate_results.py
+
+*03_Figures_3_and_4.py
+
+* 04_aux_generate_results.py
+
+* 04_Figures_5_6_7_8_9.py
+
+* 05_Table_1.py
+* 
+* 06_Figure_10.py
 
    * "Chilbolton_Case_Study" contains all the notebooks for the case study. Corresponds to Section 5 in the main paper and Supplementary Material B.2.
 
