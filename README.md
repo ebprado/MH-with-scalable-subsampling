@@ -1,6 +1,6 @@
 # Metropolis-Hastings with Scalable Subsampling
 ## Repository Overview
-This repository houses Python scripts that can be used to reproduce the results of simulation experiments and real-world applications presented in [Prado, E.B., Nemeth, C. & Sherlock, C. Metropolis-Hastings with Scalable Subsampling. arxiv (2024)](https://arxiv.org/pdf/2407.19602). In an attempt to make the reproducibility easier, we organise and name the scripts following the figures or tables their results are associated with. For any questions or issues, please refer to the contact information included in this repository.
+This repository houses Python scripts that can be used to reproduce the results of simulation experiments and real-world applications presented in [Prado, E.B., Nemeth, C. & Sherlock, C. Metropolis-Hastings with Scalable Subsampling. arxiv (2024)](https://arxiv.org/pdf/2407.19602). In an attempt to facilitate reproducibility, we organise and name the scripts following the figures or tables their results are associated with. For any questions or issues, please refer to the contact information included in this repository.
 
 Some datasets used in the real-world applications can be found in the [UCI machine learning repository](https://archive.ics.uci.edu/), and the links are provided in the scripts. The road casualties dataset can be downloaded from the R package "stats19" as shown in the corresponding script. Finally, the US census dataset is provided in this repository.
 
