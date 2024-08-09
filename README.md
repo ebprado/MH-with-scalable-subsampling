@@ -41,26 +41,11 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 
 * `04_aux_generate_results.py`: generates the simulation results for Figures 5, 6, 7, 8 and 9.
 
-* `04_Figures_5_6_7_8_9.py`: 
+* `04_Figures_5_6_7_8_9.py`: average batch size for MH-SS, SMH and RWM for the logistic regression model. For RWM, the average batch size is $n$. Both axes are presented in the logarithm base 10.
 
 * 05_Table_1.py
-* 
+  
 * 06_Figure_10.py
-
-   * "Chilbolton_Case_Study" contains all the notebooks for the case study. Corresponds to Section 5 in the main paper and Supplementary Material B.2.
-
-        * "Data Processing" shows how the Chilbolton dataset was cleaned and formatted for the case study. Corresponds to Supplementary Material B.2.1.
-
-        - "Exploratory Data Analysis" determining the atmospheric stability class at time of the Chilbolton dataset measurements. Corresponds to Supplementary Material B.2.4.
-
-        - "Inversion"  Manifold Metropolis-adjusted Langevin algorithm within Gibbs (M-MALA-within-Gibbs) parameter estimation for Source 1, Source 2, Source 3 and Source 4 from the Chilbolton dataset. Corresponds to Section 5 in the main paper and Supplementary Material B.2.5, B.2.6, and B.2.7.
-    
-
-   * "Simulation Study" contains all the notebooks for the simulation study. Corresponds to Section 4 in the main paper and Supplementary Material B.1.
-
-        - "Simulation Study Code.ipynb" this notebook was used to produce all the results of Section 4 in the main paper. 
-
-        - "Simulation Study Plots.ipynb" this notebook was used to produce all the plots of Section 4 in the main paper and in Supplementary Material B.1. 
 
 ### mhssteste:
    * Python Package containing the functions used to produce the forward modelling (Gaussian plume model) and inversion modelling (M-MALA-within-Gibbs) in the Chilbolton case study and the simulation study.
