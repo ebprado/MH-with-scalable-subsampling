@@ -2,7 +2,24 @@
 ## Repository Overview
 This repository houses Python scripts that can be used to reproduce the results of simulation experiments and real-world applications presented in [Prado, E.B., Nemeth, C. & Sherlock, C. Metropolis-Hastings with Scalable Subsampling. arxiv (2024)](https://arxiv.org/pdf/2407.19602). In an attempt to facilitate reproducibility, we organise and name the scripts following the figures or tables their results are associated with. For any questions or issues, please refer to the contact information included in this repository.
 
-The datasets [Detection of gas mixtures](https://archive.ics.uci.edu/dataset/322/gas+sensor+array+under+dynamic+gas+mixtures) and [High-energy particle physics](https://archive.ics.uci.edu/dataset/347/hepmass) in the real-world applications can be found in the [UCI machine learning repository](https://archive.ics.uci.edu/). The road casualties dataset can be downloaded from the R package "stats19" as shown in the corresponding script. Finally, the US census dataset is provided in this repository.
+Ideally, we would have liked to have all the datasets in this repository. However, some of them are too big to be stored here. The US census dataset is provided in this repository. The datasets [Detection of gas mixtures](https://archive.ics.uci.edu/dataset/322/gas+sensor+array+under+dynamic+gas+mixtures) and [High-energy particle physics](https://archive.ics.uci.edu/dataset/347/hepmass) in the real-world applications can be found in the [UCI machine learning repository](https://archive.ics.uci.edu/). Finally, the road casualties dataset can be downloaded from the R package "stats19" as
+
+```r
+install.packages('stats19')
+library(stats19)
+
+if(curl::has_internet()) {
+  
+dl_stats19(year = 2020, type = "casualty")
+dl_stats19(year = 2021, type = "casualty")
+dl_stats19(year = 2021, type = "casualty")
+  
+casualties_2020 = read_casualties(year = 2020)
+casualties_2021 = read_casualties(year = 2021)
+casualties_2022 = read_casualties(year = 2022)
+
+}
+```
 
 The package "mhteste" needs to be installed before running the scripts. This can downloaded from TestPyPI using the following command:
 
