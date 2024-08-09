@@ -35,9 +35,9 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 
 * `02_Figure_2.py`: acceptance rates of the proposed method with first-order control variates. For each combination of $\gamma$, $n$ and $d$, $10$ synthetic datasets are generated from a logistic regression model.
 
-*03_aux_generate_results.py
+* `03_aux_generate_results.py`: generates the simulation results for Figures 3 and 4.
 
-*03_Figures_3_and_4.py
+*03_Figures_3_and_4.py: acceptance rates split into $\alpha_1$ and $\alpha_2$ (along the lines of delayed-acceptance) for a logistic regression target in dimension $d=100$ with $n=30,000$ observations, and with covariates and true coefficients simulated as described in Section \ref{section:simulation}
 
 * 04_aux_generate_results.py
 
