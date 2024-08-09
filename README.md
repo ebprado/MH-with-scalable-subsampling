@@ -27,7 +27,7 @@ The package `mhteste` needs to be installed before running the scripts. This can
 pip install -i https://test.pypi.org/simple/ mhssteste
 ```
 
-# Repository Folder Structure
+# Repository folder structure
 
 ### Simulation experiments:
 
