@@ -37,9 +37,9 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 
 * `03_aux_generate_results.py`: generates the simulation results for Figures 3 and 4.
 
-*03_Figures_3_and_4.py: acceptance rates, where $\alpha = \alpha_1 \times \alpha_2$, for a logistic regression target in dimension $d=100$ with $n=30,000$ observations, and with covariates and true coefficients simulated as described in Section \ref{section:simulation}
+* `03_Figures_3_and_4.py`: acceptance rates, where $\alpha = \alpha_1 \times \alpha_2$, for a logistic regression target in dimension $d=100$ with $n=30,000$ observations, and with covariates and true coefficients simulated as described in Section 5.
 
-* 04_aux_generate_results.py
+* 04_aux_generate_results.py: 
 
 * 04_Figures_5_6_7_8_9.py
 
