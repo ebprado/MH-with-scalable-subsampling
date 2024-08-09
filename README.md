@@ -43,7 +43,7 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 
 * `04_Figures_5_6_7_8_9.py`: ESS per second, ESS divided by E(B), average batch size for MH-SS, SMH and RWM for the logistic regression model. For RWM, the average batch size is $n$. In all figures, both axes are presented in the logarithm base 10.
 
-* `05_Table_1.py`: acceptance rate, average batch size, ESS per second and ESS/E(B)$ for the Poisson regression model applied to synthetic data in $d=30$.
+* `05_Table_1.py`: acceptance rate, average batch size, ESS per second and ESS/E(B) for the Poisson regression model applied to synthetic data in $d=30$.
   
 * `06_Figure_10.py`: Acceptance rates and mean squared jumping distance (MSJD) over E(B) based on a simulation experiment with a logistic regression model with dimension $d = 100$ and $n=100,000$.
 
