@@ -37,7 +37,7 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 
 * `03_aux_generate_results.py`: generates the simulation results for Figures 3 and 4.
 
-* `03_Figures_3_and_4.py`: acceptance rates, where $\alpha = \alpha_1 \times \alpha_2$, for a logistic regression target in dimension $d=100$ with $n=30,000$ observations, and with covariates and true coefficients simulated as described in Section 5.
+* `03_Figures_3_and_4.py`: optimal scaling for the MH-SS algorithms and acceptance rates, where $\alpha = \alpha_1 \times \alpha_2$, based on a logistic regression target in dimension $d=100$ with $n=30,000$ observations, and with covariates and true coefficients simulated as described in Section 5. The efficiency metric (MSJD/$\mathbb{E}(B)$) is plotted as function of the scaling parameter ($\lambda$) and the empirical acceptance rate. 
 
 * `04_aux_generate_results.py`: generates the simulation results for Figures 5, 6, 7, 8 and 9.
 
