@@ -48,4 +48,4 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 * `06_Figure_10.py`: Acceptance rates and mean squared jumping distance (MSJD) over E(B) based on a simulation experiment with a logistic regression model with dimension $d = 100$ and $n=100,000$.
 
 ### mhssteste:
-   * Python Package containing the functions used to produce the forward modelling (Gaussian plume model) and inversion modelling (M-MALA-within-Gibbs) in the Chilbolton case study and the simulation study.
+   * Python Package containing the implementation of the Metropolis-Hastings with Scalable Subsampling (MH-SS), random-walk Metropolis-Hastings (RWM), [Scalable Metropolis-Hastings (SMH)](http://proceedings.mlr.press/v97/cornish19a/cornish19a.pdf) and [TunaMH](https://proceedings.neurips.cc/paper/2020/file/e2a7555f7cabd6e31aef45cb8cda4999-Paper.pdf).
