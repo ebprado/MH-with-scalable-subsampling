@@ -21,7 +21,7 @@ casualties_2022 = read_casualties(year = 2022)
 }
 ```
 
-The package `mhteste` needs to be installed before running the scripts. This can downloaded from TestPyPI using the following command:
+We created a Python package, `mhteste`, that needs to be installed before running the scripts. This can downloaded from TestPyPI using the following command:
 
 ```python
 pip install -i https://test.pypi.org/simple/ mhssteste
