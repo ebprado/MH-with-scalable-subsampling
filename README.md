@@ -31,7 +31,7 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 
 ### Simulation experiments:
 
-* `01_Figure_1.py` 
+* `01_Figure_1.py` generates acceptance rates and ESS per second for SMH-1, Tuna and RWM. The results are based on synthetic datasets generated from a logistic regression model with $n = 10^{4.5} \approx 30,000$ observations.
 02_Figure_2.py
 03_Figures_3_and_4.py
 03_aux_generate_results.py
