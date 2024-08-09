@@ -41,7 +41,7 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 
 * `04_aux_generate_results.py`: generates the simulation results for Figures 5, 6, 7, 8 and 9.
 
-* `04_Figures_5_6_7_8_9.py`: average batch size for MH-SS, SMH and RWM for the logistic regression model. For RWM, the average batch size is $n$. Both axes are presented in the logarithm base 10.
+* `04_Figures_5_6_7_8_9.py`: ESS per second, ESS divided by E(B), average batch size for MH-SS, SMH and RWM for the logistic regression model. For RWM, the average batch size is $n$. In all figures, both axes are presented in the logarithm base 10.
 
 * 05_Table_1.py
   
