@@ -2,14 +2,18 @@
 
 This repository houses Python scripts that can be used to reproduce the results of simulation experiments and real-world applications presented in [Prado, E.B., Nemeth, C. & Sherlock, C. Metropolis-Hastings with Scalable Subsampling. arxiv (2024)](https://arxiv.org/pdf/2407.19602). In an attempt to facilitate reproducibility, we created a Python package (see intructions below) and organised/named the scripts following the figures or tables their outputs are associated with. For any questions or issues, please refer to the contact information included in this repository.
 
-Ideally, we would have liked to have all datasets analysed in the paper in this repository. However, some of them are too big to be stored here. The US census dataset is the only one provided in this repository. The datasets [detection of gas mixtures](https://archive.ics.uci.edu/dataset/322/gas+sensor+array+under+dynamic+gas+mixtures) and [high-energy particle physics](https://archive.ics.uci.edu/dataset/347/hepmass) can be found in the [UCI machine learning repository](https://archive.ics.uci.edu/).
+Ideally, we would have liked to have all datasets analysed in the paper in this repository. However, some of them are too big to be stored here. The US census dataset is the only one provided in this repository. The datasets[detection of gas mixtures and high-energy particle physics can be found in the [UCI machine learning repository](https://archive.ics.uci.edu/); see the links below.
 
-We created a Python package, `mhteste`, that needs to be installed before running the scripts. This can downloaded from TestPyPI using the following command:
+We created a Python package, `mhteste`, that needs to be installed before running the scripts. This can downloaded from [TestPyPI](https://test.pypi.org/) via `pip` or `pip3` using the following commands:
 
-```python
-pip install -i https://test.pypi.org/simple/ mhssteste
-```
-
+* Option 1:
+ ```python
+ pip install -i https://test.pypi.org/simple/ mhssteste
+ ```
+ * Option 2:
+ ```python
+ python3 -m pip install -i https://test.pypi.org/simple/ mhssteste
+ ```
 # Repository folder structure
 
 ## Simulation experiments
@@ -71,7 +75,7 @@ pip install -i https://test.pypi.org/simple/ mhssteste
     ```
 
 
-## mhssteste:
+## mhssteste
    * Python Package containing the implementation of the Metropolis-Hastings with Scalable Subsampling (MH-SS), random-walk Metropolis-Hastings (RWM), [Scalable Metropolis-Hastings (SMH)](http://proceedings.mlr.press/v97/cornish19a/cornish19a.pdf) and [TunaMH](https://proceedings.neurips.cc/paper/2020/file/e2a7555f7cabd6e31aef45cb8cda4999-Paper.pdf).
 
   * We implemented all algorithms using two strategies: `loop` and `vectorised` operations. All results in the main paper used for-loop operations to evaluate the likelihood terms. This strategy is generally slower, but it does make all algorithms comparable. In the Appendices, we show a comparison between `loop` and `vectorised` operations in the context of our simulations. As stated in the paper, we decided to adopt `loop` operations for the sake of having a fair comparison in the run-times amongst the considered algorithms due to the way the SMH algorithm, which is implemented in C++, is designed.
