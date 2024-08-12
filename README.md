@@ -10,10 +10,14 @@ We created a Python package, `mhteste`, that needs to be installed before runnin
 * Linux:
 
 * MacOS:
-  ```python
-  pip install -i https://test.pypi.org/simple/ mhssteste
-  ```
-
+   - Option 1:
+    ```python
+    pip install -i https://test.pypi.org/simple/ mhssteste
+    ```
+    - Option 2:
+    ```python
+    python3 -m pip install -i https://test.pypi.org/simple/ mhssteste
+    ```
 # Repository folder structure
 
 ## Simulation experiments
