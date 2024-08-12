@@ -5,10 +5,13 @@ This repository houses Python scripts that can be used to reproduce the results 
 Ideally, we would have liked to have all datasets analysed in the paper in this repository. However, some of them are too big to be stored here. The US census dataset is the only one provided in this repository. The datasets [detection of gas mixtures](https://archive.ics.uci.edu/dataset/322/gas+sensor+array+under+dynamic+gas+mixtures) and [high-energy particle physics](https://archive.ics.uci.edu/dataset/347/hepmass) can be found in the [UCI machine learning repository](https://archive.ics.uci.edu/).
 
 We created a Python package, `mhteste`, that needs to be installed before running the scripts. This can downloaded from TestPyPI using the following command:
-
+* Windows:
 ```python
 pip install -i https://test.pypi.org/simple/ mhssteste
 ```
+* Linux:
+
+* MacOS:
 
 # Repository folder structure
 
