@@ -59,7 +59,11 @@ pip install -i https://test.pypi.org/simple/ mhssteste
   
 * `data`: The dataset used in the analysis can be downloaded in this link: [detection of gas mixtures](https://archive.ics.uci.edu/dataset/322/gas+sensor+array+under+dynamic+gas+mixtures).
 
-### Hepmass:
+### Hepmass
+
+* `hepmass.py`: For a sample of $ n = 1, 000, 000$ observations from the training set, we analyse whether a new particle of unknown mass is observed. The dataset has originally $26$ continuous predictors and is split into a training set of $7$ million observations and a test set of $3.5$ million. 
+
+* `data`: The dataset contains information about signatures of exotic particles obtained from a high-energy physics experiment. The binary response variable indicates whether a new particle of unknown mass is observed. The dataset can be found in this link: [high-energy particle physics](https://archive.ics.uci.edu/dataset/347/hepmass).
 
 ### Road casualties UK: 
 
