@@ -54,7 +54,10 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 
 * `usa_pop_survey.py`: We used a sample of $n = 500,000$ survey participants to model whether or not an individual has a total pre-tax personal income above $\$25,000$ for the previous year, based on $10$ predictors.
   
-### Detection gas:
+### Detection gas
+* `gas_sensor.py`: For a sample of size $n = 250,000$, we predict whether the concentration of Ethylene in the air, measured in parts per million, is above zero. Though we consider $d = 7$ continuous predictors only (including an intercept), each of which corresponds to a different model sensor, some of them are highly correlated.
+  
+* `data`: The dataset of [detection of gas mixtures](https://archive.ics.uci.edu/dataset/322/gas+sensor+array+under+dynamic+gas+mixtures) can be downloaded from the UCI machine learning repository.
 
 ### Hepmass:
 
