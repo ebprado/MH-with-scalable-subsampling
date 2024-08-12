@@ -29,7 +29,7 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 
 # Repository folder structure
 
-### Simulation experiments:
+## Simulation experiments:
 
 * `01_Figure_1.py`: acceptance rates and ESS per second for SMH-1, Tuna and RWM. The results are based on synthetic datasets generated from a logistic regression model with $n = 10^{4.5} = 31,622$ observations.
 
@@ -47,18 +47,18 @@ pip install -i https://test.pypi.org/simple/ mhssteste
   
 * `06_Figure_10.py`: Acceptance rates and mean squared jumping distance (MSJD) over E(B) based on a simulation experiment with a logistic regression model with dimension $d = 100$ and $n=100,000$.
 
-### Real-world applications
+## Real-world applications
 
-#### U.S. population survey: 
+### U.S. population survey: 
 
-#### Detection gas:
+### Detection gas:
 
-#### Hepmass:
+### Hepmass:
 
-#### Road casualties UK: 
+### Road casualties UK: 
 
 
-### mhssteste:
+## mhssteste:
    * Python Package containing the implementation of the Metropolis-Hastings with Scalable Subsampling (MH-SS), random-walk Metropolis-Hastings (RWM), [Scalable Metropolis-Hastings (SMH)](http://proceedings.mlr.press/v97/cornish19a/cornish19a.pdf) and [TunaMH](https://proceedings.neurips.cc/paper/2020/file/e2a7555f7cabd6e31aef45cb8cda4999-Paper.pdf).
 
   * We implemented all algorithms using two strategies: `loop` and `vectorised` operations. All results in the main paper used for-loop operations to evaluate the likelihood terms. This strategy is generally slower, but it does make all algorithms comparable. In the Appendices, we show a comparison between `loop` and `vectorised` operations in the context of our simulations. As stated in the paper, we decided to adopt `loop` operations for the sake of having a fair comparison in the run-times amongst the considered algorithms due to the way the SMH algorithm, which is implemented in C++, is designed.
