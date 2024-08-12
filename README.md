@@ -7,7 +7,10 @@ Ideally, we would have liked to have all datasets analysed in the paper in this 
 We created a Python package, `mhteste`, that needs to be installed before running the scripts. This can downloaded from TestPyPI using the following command:
 * Windows:
 
-* Linux:
+* Linux (Ubuntu):
+   ```python
+   sudo pip install -i https://test.pypi.org/simple/ mhssteste
+   ```
 
 * MacOS:
    - Option 1:
