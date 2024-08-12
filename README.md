@@ -49,7 +49,7 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 * `data`: The dataset contains information about signatures of exotic particles obtained from a high-energy physics experiment. The binary response variable indicates whether a new particle of unknown mass is observed. The dataset can be found in this link: [high-energy particle physics](https://archive.ics.uci.edu/dataset/347/hepmass).
 
 ### Road casualties UK
-* `road_casualties_UK.py`: We compare the performance of MH-SS, SMH and Tuna on the consolidated UK road casualties data from $2020$ to $2022$. We aim to model at the individual level of $n = 298,290$ accidents the number of casualties based on 8 predictors, of which 2 are continuous. In total, the linear predictor in our Poisson model with mean $\log(1 + e^{\eta})$ has $d=28$ parameters (including the intercept).
+* `road_casualties_UK.py`: We analyse the consolidated UK road casualties data from $2020$ to $2022$. We aim to model at the individual level of $n = 298,290$ accidents the number of casualties based on 8 predictors, of which 2 are continuous. In total, the linear predictor in our Poisson model with mean $\log(1 + e^{\eta})$ has $d=28$ parameters (including the intercept).
 
 * `data`: The UK Department for Transport publishes annual road safety statistics as part of the Statistics and Registration Service Act 2007. The data include the accident's geographical coordinates, severity, speed limit of the road where the accident took place, details about the vehicles involved, weather conditions, road conditions, as well as time and date. The road casualties dataset can be downloaded from the R package `stats19` as
 
