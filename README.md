@@ -52,7 +52,7 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 ### U.S. population survey 
 * `usa_pop_survey_data.zip`: The 2018 United States Current Population Survey is a monthly household survey carried out by the U.S. Census Bureau and the U.S. Bureau of Labor Statistics that gathers information on the labour force for the population of the U.S. The data contain variables such as income, education, occupation, participation in welfare programs and health insurance.
 
-* `usa_pop_survey.py`: We used a sample of $n = 500,000$ survey participants to model whether or not an individual has a total pre-tax personal income above $$25,000$ for the previous year, based on $10$ predictors.
+* `usa_pop_survey.py`: We used a sample of $n = 500,000$ survey participants to model whether or not an individual has a total pre-tax personal income above $25,000$ U.S. dollars for the previous year, based on $10$ predictors.
   
 ### Detection gas
 * `gas_sensor.py`: For a sample of size $n = 250,000$, we predict whether the concentration of Ethylene in the air, measured in parts per million, is above zero. Though we consider $d = 7$ continuous predictors only (including an intercept), each of which corresponds to a different model sensor, some of them are highly correlated.
