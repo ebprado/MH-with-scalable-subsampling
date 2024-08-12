@@ -2,24 +2,7 @@
 
 This repository houses Python scripts that can be used to reproduce the results of simulation experiments and real-world applications presented in [Prado, E.B., Nemeth, C. & Sherlock, C. Metropolis-Hastings with Scalable Subsampling. arxiv (2024)](https://arxiv.org/pdf/2407.19602). In an attempt to facilitate reproducibility, we created a Python package (see intructions below) and organised/named the scripts following the figures or tables their outputs are associated with. For any questions or issues, please refer to the contact information included in this repository.
 
-Ideally, we would have liked to have all datasets analysed in the paper in this repository. However, some of them are too big to be stored here. The US census dataset is the only one provided in this repository. The datasets [detection of gas mixtures](https://archive.ics.uci.edu/dataset/322/gas+sensor+array+under+dynamic+gas+mixtures) and [high-energy particle physics](https://archive.ics.uci.edu/dataset/347/hepmass) can be found in the [UCI machine learning repository](https://archive.ics.uci.edu/). Finally, the road casualties dataset can be downloaded from the R package `stats19` as
-
-```r
-install.packages('stats19')
-library(stats19)
-
-if(curl::has_internet()) {
-  
-dl_stats19(year = 2020, type = "casualty")
-dl_stats19(year = 2021, type = "casualty")
-dl_stats19(year = 2021, type = "casualty")
-  
-casualties_2020 = read_casualties(year = 2020)
-casualties_2021 = read_casualties(year = 2021)
-casualties_2022 = read_casualties(year = 2022)
-
-}
-```
+Ideally, we would have liked to have all datasets analysed in the paper in this repository. However, some of them are too big to be stored here. The US census dataset is the only one provided in this repository. The datasets [detection of gas mixtures](https://archive.ics.uci.edu/dataset/322/gas+sensor+array+under+dynamic+gas+mixtures) and [high-energy particle physics](https://archive.ics.uci.edu/dataset/347/hepmass) can be found in the [UCI machine learning repository](https://archive.ics.uci.edu/).
 
 We created a Python package, `mhteste`, that needs to be installed before running the scripts. This can downloaded from TestPyPI using the following command:
 
@@ -65,7 +48,28 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 
 * `data`: The dataset contains information about signatures of exotic particles obtained from a high-energy physics experiment. The binary response variable indicates whether a new particle of unknown mass is observed. The dataset can be found in this link: [high-energy particle physics](https://archive.ics.uci.edu/dataset/347/hepmass).
 
-### Road casualties UK: 
+### Road casualties UK
+* `road_casualties_UK.py`:
+
+
+* `data`: The UK Department for Transport publishes annual road safety statistics as part of the Statistics and Registration Service Act 2007. The data include the accident's geographical coordinates, severity, speed limit of the road where the accident took place, details about the vehicles involved, weather conditions, road conditions, as well as time and date. The road casualties dataset can be downloaded from the R package `stats19` as
+
+```r
+install.packages('stats19')
+library(stats19)
+
+if(curl::has_internet()) {
+  
+dl_stats19(year = 2020, type = "casualty")
+dl_stats19(year = 2021, type = "casualty")
+dl_stats19(year = 2021, type = "casualty")
+  
+casualties_2020 = read_casualties(year = 2020)
+casualties_2021 = read_casualties(year = 2021)
+casualties_2022 = read_casualties(year = 2022)
+
+}
+```
 
 
 ## mhssteste:
