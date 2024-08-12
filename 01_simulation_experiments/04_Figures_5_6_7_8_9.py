@@ -1,7 +1,9 @@
-from plotnine import *
-import pickle
-import numpy as np
-import pandas as pd
+try:
+    from plotnine import *
+    import pandas as pd
+    from mhssteste import *
+except ImportError:
+    raise ImportError("Please make sure plotnine, pandas and mhssteste are ALL installed!")
 
 def organise_outputs(type_plot, implementation):
 
