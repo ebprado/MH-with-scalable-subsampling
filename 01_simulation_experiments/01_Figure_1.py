@@ -103,7 +103,7 @@ def run_SMH(x, y, theta_hat, V, bound, taylor_order, npost, model, implementatio
 
 def run_methods(N, d, model, implementation='loop', npost=100000):
 
-    npost_tuna = 100
+    npost_tuna = 10000000
 
     data = simulate_data(N, d, model)
     y = data.get('y')
