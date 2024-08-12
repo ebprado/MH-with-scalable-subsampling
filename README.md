@@ -2,7 +2,7 @@
 
 This repository houses Python scripts that can be used to reproduce the results of simulation experiments and real-world applications presented in [Prado, E.B., Nemeth, C. & Sherlock, C. Metropolis-Hastings with Scalable Subsampling. arxiv (2024)](https://arxiv.org/pdf/2407.19602). In an attempt to facilitate reproducibility, we created a Python package (see intructions below) and organised/named the scripts following the figures or tables their outputs are associated with. For any questions or issues, please refer to the contact information included in this repository.
 
-Ideally, we would have liked to have all datasets analysed in the paper in this repository. However, some of them are too big to be stored here. The US census dataset is the only one provided in this repository. The datasets[detection of gas mixtures and high-energy particle physics can be found in the [UCI machine learning repository](https://archive.ics.uci.edu/); see the links below.
+Ideally, we would have liked to have all datasets analysed in the paper in this repository. However, some of them are too big to be stored here. The US census dataset is the only one provided in this repository. The datasets detection of gas mixtures and high-energy particle physics can be found in the [UCI machine learning repository](https://archive.ics.uci.edu/); see the links below.
 
 We created a Python package, `mhteste`, that needs to be installed before running the scripts. This can downloaded from [TestPyPI](https://test.pypi.org/) via `pip` or `pip3` using the following commands:
 
