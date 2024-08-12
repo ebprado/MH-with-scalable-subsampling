@@ -1,0 +1,4 @@
+tensorflow
+tqdm
+scipy
+plotnine

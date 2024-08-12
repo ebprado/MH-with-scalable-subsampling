@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: mhssteste
+Version: 0.0.2
+Author: Estevao Prado, Christopher Nemeth, Chris Sherlock
+Maintainer-email: Estevao Prado <e.prado1@lancaster.ac.uk>
+Project-URL: Paper, https://arxiv.org/pdf/2407.19602
+Project-URL: GitHub, https://github.com/ebprado/MH-with-scalable-subsampling
+Description-Content-Type: text/markdown
+Requires-Dist: tensorflow
+Requires-Dist: tqdm
+Requires-Dist: scipy
+Requires-Dist: plotnine
+
+Python package that can be used to reproduce the figures and tables presented in [Prado, E.B., Nemeth, C. & Sherlock, C. Metropolis-Hastings with Scalable Subsampling. arxiv (2024)][mhss_paper].
+
+[mhss_paper]: https://arxiv.org/pdf/2407.19602

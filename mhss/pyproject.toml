@@ -1,0 +1,31 @@
+description = "Metropolis-Hastings with Scalable Subsampling."
+license = {file = "LICENSE.txt"}
+keywords = ["Metropolis-Hastings with Scalable Subsampling", "Tuna Metropolis-Hastings algorithm", "Scalable Metropolis-Hastings"]
+
+[build-system]
+requires = ["setuptools == 68.2.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mhssteste"
+readme = "README.md"
+version = "0.0.2"
+dependencies = [
+    "tensorflow",
+    "tqdm",
+    "scipy",
+    "plotnine",
+]
+
+authors = [
+  {name = "Estevao Prado"},
+  {name = "Christopher Nemeth"},
+  {name = "Chris Sherlock"},
+]
+maintainers = [
+  {name = "Estevao Prado", email = "e.prado1@lancaster.ac.uk"}
+]
+
+[project.urls]
+Paper = "https://arxiv.org/pdf/2407.19602"
+GitHub = "https://github.com/ebprado/MH-with-scalable-subsampling"
