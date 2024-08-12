@@ -6,14 +6,14 @@ Ideally, we would have liked to have all datasets analysed in the paper in this 
 
 We created a Python package, `mhteste`, that needs to be installed before running the scripts. This can downloaded from [TestPyPI](https://test.pypi.org/) via `pip` or `pip3` using the following commands:
 
-   - Option 1:
-    ```python
-    pip install -i https://test.pypi.org/simple/ mhssteste
-    ```
-    - Option 2:
-    ```python
-    python3 -m pip install -i https://test.pypi.org/simple/ mhssteste
-    ```
+* Option 1:
+ ```python
+ pip install -i https://test.pypi.org/simple/ mhssteste
+ ```
+ * Option 2:
+ ```python
+ python3 -m pip install -i https://test.pypi.org/simple/ mhssteste
+ ```
 # Repository folder structure
 
 ## Simulation experiments
