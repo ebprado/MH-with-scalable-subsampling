@@ -14,7 +14,7 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 
 ## Simulation experiments
 
-* `01_Figure_1.py`: acceptance rates and ESS per second for SMH-1, Tuna and RWM. The results are based on synthetic datasets generated from a logistic regression model with $n = 10^{4.5} = 31,622$ observations.
+* `01_Figure_1.py`: acceptance rates and ESS per second for SMH-1, Tuna and RWM. The results are based on synthetic datasets generated from a logistic regression model with $n = 31,622$ observations.
 
 * `02_Figure_2.py`: acceptance rates of the proposed method with first-order control variates. For each combination of $\gamma$, $n$ and $d$, $10$ synthetic datasets are generated from a logistic regression model.
 
