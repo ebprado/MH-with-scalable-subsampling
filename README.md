@@ -50,7 +50,9 @@ pip install -i https://test.pypi.org/simple/ mhssteste
 ## Real-world applications
 
 ### U.S. population survey 
-* The 2018 United States Current Population Survey is a monthly household survey carried out by the U.S. Census Bureau and the U.S. Bureau of Labor Statistics that gathers information on the labour force for the population of the U.S. The data contain variables such as income, education, occupation, participation in welfare programs and health insurance. We used a sample of $n = 500,000$ survey participants to model whether or not an individual has a total pre-tax personal income above $\$25,000$ for the previous year, based on $10$ predictors.
+* `usa_pop_survey_data.csv.zip`: The 2018 United States Current Population Survey is a monthly household survey carried out by the U.S. Census Bureau and the U.S. Bureau of Labor Statistics that gathers information on the labour force for the population of the U.S. The data contain variables such as income, education, occupation, participation in welfare programs and health insurance.
+
+* `usa_pop_survey.py`: We used a sample of $n = 500,000$ survey participants to model whether or not an individual has a total pre-tax personal income above $\$25,000$ for the previous year, based on $10$ predictors.
   
 ### Detection gas:
 
