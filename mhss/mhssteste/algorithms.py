@@ -21,6 +21,19 @@ def open_file(file_name):
         return pickle.load(f)
 
 def simulate_data(N, d, model, std_theta = 1):
+
+    """
+    Simulate synthetic data either from a logistic, probit or poisson regression model.
+
+    Parameters
+    ----------
+
+    N : number of observations
+    d : number of parameters in the linear predictor
+    model : either 'logistic', 'probit' or 'poisson'
+    std_theta : standard deviation of the normal distribution used to simulate the covariates
+    """
+
     if model == 'logistic':
         data = simulate_logistic_regression(N, d, std_theta)    
     elif model == 'probit':
@@ -30,10 +43,25 @@ def simulate_data(N, d, model, std_theta = 1):
     return data
 
 def multivariate_norm(mean, cholesky_dec, d):
+
+    """ Sample from a multivariate normal using Choleski decomposition """
+
     z = np.random.normal(0, 1, d)
     return mean + cholesky_dec @ z
 
 def simulate_logistic_regression(N, d, std_theta):
+
+    """
+    Simulate synthetic data from a logistic model.
+    
+    Parameters
+    ----------
+
+    N : number of observations
+    d : number of parameters in the linear predictor
+    std_theta : standard deviation of the normal distribution used to simulate the covariates
+    """
+
     x = np.random.normal(0, 1, N * d) # simulate covariates
     x = np.array(x).reshape(N, d)
     x[:, 0] = np.repeat(1, N)
@@ -55,6 +83,18 @@ def simulate_logistic_regression(N, d, std_theta):
     }
 
 def simulate_probit_regression(N, d, std_theta):
+
+    """
+    Simulate synthetic data from a probit model.
+
+    Parameters
+    ----------
+
+    N : number of observations
+    d : number of parameters in the linear predictor
+    std_theta : standard deviation of the normal distribution used to simulate the covariates
+    """
+
     x = np.random.normal(0, 1, N * d) # simulate covariates
     x = np.array(x).reshape(N, d)
     x[:, 0] = np.repeat(1, N)
@@ -76,6 +116,18 @@ def simulate_probit_regression(N, d, std_theta):
     }
 
 def simulate_poisson_regression(N, d, std_theta):
+
+    """
+    Simulate synthetic data from a poisson model.
+
+    Parameters
+    ----------
+
+    N : number of observations
+    d : number of parameters in the linear predictor
+    std_theta : standard deviation of the normal distribution used to simulate the covariates
+    """
+
     x = np.random.normal(0, 1, N * d) # simulate covariates
     x = np.array(x).reshape(N, d)
     x[:, 0] = np.repeat(1, N)
@@ -95,113 +147,88 @@ def simulate_poisson_regression(N, d, std_theta):
         'theta': theta
     }
 
-def transform_rows(x):
-    L = np.linalg.cholesky(x.T @ x)
-    # var_x = L @ L.T # sanity check: L L^T == x.T @ x
-    L_inv = np.linalg.inv(L)
-    # L_inv @ var_x @ L_inv.T == Identity
-    x_transformed = x @ L_inv.T
-    # x_transformed.T @ x_transformed == Identity
-    return x_transformed, L
-
 def L1_norm(x):
+    """ Calculate the L1-norm """
     return np.linalg.norm(x,1)
 
 def L2_norm_vector(x):
+    """ Calculate the L1-norm of a vector """
     return np.linalg.norm(x,2)
 
 def L2_norm_matrix(x):
+    """ Calculate the L1-norm of a vector """
     return np.linalg.norm(x,2,1)
 
 def logistic_log_target_i(beta, y, x):
+    """ Log of the likelihood of a logistic regression model """
     betaTx = x @ beta
     log_lik = -np.log(1+ np.exp(betaTx)) + betaTx * y
     return log_lik
 
 def logistic_grad_log_target_i(beta, x, y):
+    """ Gradient of the log of the likelihood of a logistic regression model """
     gradient_log_lik = x * (y - 1 / (1 + np.exp(-x @ beta)))[:, None]
-    # if np.isscalar(y):
-    #     gradient_log_lik = x * (y - 1 / (1 + np.exp(-x @ beta)))
-    # else:
-    #     gradient_log_lik = x * (y - 1 / (1 + np.exp(-x @ beta)))[:, None]
-    return gradient_log_lik # + gradient_prior
+    return gradient_log_lik
 
 def logistic_hessian_log_target_i(beta, x, y):
+    """ Hessian of the log of the likelihood of a logistic regression model """
     nrow = len(y)
     prob = 1/(1 + np.exp(-x @ beta))
     aux = prob*(1-prob)
     hessian_log_lik = -np.asarray([ aux[i] * x[i, None].T @ x[i, None] for i in range(nrow) ])
-    return hessian_log_lik, -aux  # + gradient_prior
+    return hessian_log_lik, -aux
 
 def probit_log_target_i(beta, y, x):
+    """ Log of the likelihood of a probit regression model """
     eta = x @ beta
     PHI = scs.norm.cdf(eta)   
     log_lik = y * np.log(PHI) + (1 - y) * np.log(1 - PHI)
     return log_lik
 
 def probit_grad_log_target_i(beta, x, y):
+    """ Gradient of the log of the likelihood of a probit regression model """
     eta = x @ beta
     phi = scs.norm.pdf(eta)
     PHI = scs.norm.cdf(eta)
     gradient_log_lik = x * (y * (phi / PHI) - (1 - y) * phi/(1-PHI))[:, None]
-    # if np.isscalar(y):
-    #     gradient_log_lik = x * (y * (phi / PHI) - (1 - y) * phi/(1-PHI))
-    # else:
-    #     gradient_log_lik = x * (y * (phi / PHI) - (1 - y) * phi/(1-PHI))[:, None]
-    return gradient_log_lik # + gradient_prior
+    return gradient_log_lik
 
 def probit_hessian_log_target_i(beta, x, y):
+    """ Hessian of the log of the likelihood of a probit regression model """
     nrow = len(y)
     eta = x @ beta
     phi = scs.norm.pdf(eta)
     PHI = scs.norm.cdf(eta)
     aux = -phi * y * ((eta * PHI + phi) / PHI**2) + phi * (1-y) * ((eta * (1 - PHI) - phi) / (1 - PHI)**2)
     hessian_log_lik = np.asarray([ aux[i] * x[i, None].T @ x[i, None] for i in range(nrow) ])
-    return hessian_log_lik, aux # + gradient_prior
+    return hessian_log_lik, aux
 
 def poisson_log_target_i(beta, y, x):
+    """ Log of the likelihood of a poisson regression model with expectation log (1 + exp (x * beta))"""
     eta = x @ beta
     lambda_poisson = np.log(1 + np.exp(eta))
     log_lik = y * np.log(lambda_poisson) - lambda_poisson - sc.gammaln(y + 1)
     return log_lik
 
 def poisson_grad_log_target_i(beta, x, y):
+    """ Gradient of the log of the likelihood of a poisson regression model with expectation log (1 + exp (x * beta))"""
     eta = x @ beta
     lambda_poisson = np.log(1 + np.exp(eta))
     gradient_log_lik = x * ((y / lambda_poisson - 1) * (1 / (1 + np.exp(-eta))))[:, None]
-    # if np.isscalar(y):
-    #     gradient_log_lik = x * ((y / lambda_poisson - 1) * (1 / (1 + np.exp(-eta))))
-    # else:
-    #     gradient_log_lik = x * ((y / lambda_poisson - 1) * (1 / (1 + np.exp(-eta))))[:, None]
-    return gradient_log_lik # + gradient_prior
+
+    return gradient_log_lik
 
 def poisson_hessian_log_target_i(beta, x, y):
+    """ Hessian of the log of the likelihood of a poisson regression model with expectation log (1 + exp (x * beta))"""
     nrow = len(y)
     eta = x @ beta
     exp_eta = np.exp(eta)
     aux = -(exp_eta / (1 + exp_eta)**2) * (y * (exp_eta / (np.log(1 + exp_eta))**2 - 1/np.log(1 + exp_eta)) + 1)
     hessian_log_lik = np.asarray([ aux[i] * x[i, None].T @ x[i, None] for i in range(nrow) ])
-    return hessian_log_lik, aux # + gradient_prior
-
-def gd(grad_log_target, x, y, d, k, x0 = None, tol=1e-6):
-
-    h = 1/k
-    if x0 == None:
-        par_theta = np.zeros(d) # initial values
-    else:
-        par_theta = x0
-    i = 0
-    diff = 1
-    while i <= k and diff > tol:
-        aux_previous_par = par_theta
-        par_theta = par_theta + h*np.sum(grad_log_target(par_theta, x, y), axis=0)
-        # if d == 1: par_theta = par_theta[0, :]
-        diff = L1_norm(par_theta - aux_previous_par)
-        i = i+1
-        # print(par_theta)
-    return par_theta
+    return hessian_log_lik, aux
 
 def sgd(grad_log_target, x, y, k, x0 = None, tol=1e-10):
+    """ Implementation of the stochastic gradient descent algorithm """
 
     n = len(y)
     d = x.shape[1]
@@ -258,6 +285,8 @@ def check_bound(x, V, kappa, model, nsamples=1000):
 
 def sgd_tf(grad_log_target_i, x, y, x0 = None, basic_lr = None, tol=1e-7, iter_max = 100000):
 
+    """ Implementation of the stochastic gradient descent algorithm using TensorFlow """
+
     d = x.shape[1]
     N = x.shape[0]
 
@@ -306,7 +335,10 @@ def sgd_tf(grad_log_target_i, x, y, x0 = None, basic_lr = None, tol=1e-7, iter_m
     return parameters
 
 def effective_sample_size(x):
-    # Implement both the positive and monotone sequence; see Section 3.3 of Geyer (1992)
+
+    """ Implementation of the positive and monotone sequence to calculate effective sample size; see Section 3.3 of Geyer (1992) """
+
+    
     nrow = len(x)
     ncol = x.shape[1]
     # Organise the autocovariances in a matrix with 2 columns where the autocovs 2m and 2m + 1 are in the same row.
@@ -344,6 +376,10 @@ def effective_sample_size(x):
     return ess
 
 def define_target_and_bounds(x, y, theta_hat, model, control_variates, taylor_order):
+
+    """ Define all the terms in | l(theta) - l(theta') - r(theta, theta') <= c_i M(theta, theta') based on the corresponding model,
+        except for M(theta, theta').
+    """
 
     if model == 'logistic':
         log_target_i = logistic_log_target_i
@@ -419,16 +455,10 @@ def define_target_and_bounds(x, y, theta_hat, model, control_variates, taylor_or
     
     return U, c_i, log_target_i, sum_grad_at_theta_hat, sum_hess_at_theta_hat
 
-def D_1(omega):
-    return (1 + np.abs(omega))/2
-
-def D_2(omega, aux1 = 3**1.5):
-    abs_omega = np.abs(omega)
-    c_2 = np.sqrt(2 + 0.25*(omega)**2) - 0.5 * abs_omega
-    return 1/(c_2 * aux1) * (2 + abs_omega * c_2)**1.5
-
 def M_theta_theta_prime(theta, theta_prime, theta_hat, control_variates, taylor_order):
-    
+    """ Define M(theta, theta').
+    """
+
     if control_variates == True:
 
         p1_omega = L2_norm_vector(theta - theta_hat)
@@ -460,7 +490,19 @@ def M_theta_theta_prime(theta, theta_prime, theta_hat, control_variates, taylor_
 
     return M
 
+def D_1(omega):
+    """ See Section 'Regression models: Further improvement on bounds' """
+    return (1 + np.abs(omega))/2
+
+def D_2(omega, aux1 = 3**1.5):
+    """ See Section 'Regression models: Further improvement on bounds' """
+    abs_omega = np.abs(omega)
+    c_2 = np.sqrt(2 + 0.25*(omega)**2) - 0.5 * abs_omega
+    return 1/(c_2 * aux1) * (2 + abs_omega * c_2)**1.5
+
 def get_theta_hat_and_var_cov_matrix(model, x, y, x0=None, basic_lr=None, iter_max=100000):
+
+    """ Find an estimate (theta hat) of the posterior mode via SGD and evaluate the Hessian at theta hat """
 
     if model =='logistic':
         grad_log_target = logistic_grad_log_target_i
@@ -493,6 +535,32 @@ def get_theta_hat_and_var_cov_matrix(model, x, y, x0=None, basic_lr=None, iter_m
     return theta_hat, V
 
 def RWM(y, x, V, x0, model, nburn, npost, implementation, kappa = 2.4):
+
+    """ 
+    General description: random-walk Metropolis algorithm
+
+    Parameters
+    ----------
+    y : dependent/response univariate variable
+    x : an n x d design matrix 
+    V : covariance matrix of the proposal distribution for the random-walk proposal
+    x0: initial parameter values
+    model : it can be 'logistic', 'probit' and 'poisson'
+    nburn : number of MCMC iterations for the burn-in period
+    npost : number of MCMC iterations for the post-burn-in period
+    implementation: either 'loop' or 'vectorised'
+    kappa : scaling parameter of the random-walk proposal distribution
+    
+    Returns
+    -------
+    parameters : a matrix with posterior samples
+    acc_rate : overall acceptance probability of the algorithm (i.e., alpha1 * alpha2)
+    cpu_time : how long it took to run (in seconds)
+    meanSJD : mean squared jump distance
+    ESS : effective sample size
+    N : number of observations
+    d : number of parameters
+    """
 
     n = len(y)
     d = len(x0)
@@ -561,7 +629,9 @@ def RWM(y, x, V, x0, model, nburn, npost, implementation, kappa = 2.4):
             'd': d}
 
 def get_psi(model, x, y, bound, taylor_order):
-    
+
+    """ See Equation 13 in Cornish et al (ICML, 2019) """
+
     if taylor_order == 1:
 
         if bound == 'ChrisS':
@@ -593,6 +663,8 @@ def get_psi(model, x, y, bound, taylor_order):
     return psi
 
 def get_phi_theta_theta_prime(theta, theta_prime, theta_hat, bound, taylor_order=1):
+    
+    """ See Equation 13 in Cornish et al (ICML, 2019) """
 
     if bound == 'orig' and taylor_order == 1:
         phi_theta_theta_prime = 1/2 * (L1_norm(theta - theta_hat)**2 + L1_norm(theta_prime - theta_hat)**2)
@@ -603,7 +675,40 @@ def get_phi_theta_theta_prime(theta, theta_prime, theta_hat, bound, taylor_order
 
     return phi_theta_theta_prime
 
-def SMH(y, x, V, x0, kappa, bound, model, implementation, taylor_order = 1, nburn=1000, npost=1000, control_variates = True, nthin = 1):
+def SMH(y, x, V, x0, nburn, npost, kappa, model, implementation, bound = 'orig', taylor_order = 1, control_variates = True, nthin = 1):
+
+    """ 
+    General description: Scalable Metropolish-Hastings algorithm (Cornish et al, ICML 2019)
+
+    Parameters
+    ----------
+    y : dependent/response univariate variable
+    x : an n x d design matrix 
+    V : covariance matrix of the proposal distribution for the random-walk proposal
+    x0: initial parameter values
+    nburn : number of MCMC iterations for the burn-in period
+    npost : number of MCMC iterations for the post-burn-in period
+    kappa : scaling parameter of the random-walk proposal distribution
+    model : it can be 'logistic', 'probit' and 'poisson'
+    implementation: either 'loop' or 'vectorised'
+    bound : if bounds = 'orig', then the original bounds presented in the SMH paper are used. If bound = 'ChrisS', then the resulting algorithm is the SMH-NB.
+
+    taylor_order: order of the control-variates. It's either 1 or 2.
+    nthin : Every nthin draw is kept to be returned to the user. 
+
+    Returns
+    -------
+    parameters : a matrix with posterior samples
+    acc_rate : overall acceptance probability of the algorithm (i.e., alpha1 * alpha2)
+    acc_rate_ratio1 : Stage 1 acceptance probability  (i.e., alpha1 only)
+    BoverN : Average batch size over the total number of observations
+    cpu_time : how long it took to run (in seconds)
+    meanSJD : mean squared jump distance
+    ESS : effective sample size
+    N : number of observations
+    d : number of parameters
+    """
+
     # Pre-processing (control variates)
     n = len(y)
     d = len(x0)
@@ -751,7 +856,45 @@ def SMH(y, x, V, x0, kappa, bound, model, implementation, taylor_order = 1, nbur
             'N': n,
             'd': d}
 
-def MH_SS(y, x, V, x0, chi, nburn, npost, control_variates, bound, model, implementation, taylor_order=1, phi_function = 'min', kappa = 1.5, nthin = 1):
+def MH_SS(y, x, V, x0, nburn, npost, model, implementation, control_variates = True, chi = 0, taylor_order=1, phi_function = 'min', kappa = 1.5, nthin = 1):
+
+    """ 
+    General description: Metropolis-Hastings with Scalable Subsampling algorithm. This implementation can also
+    be used to run the Tuna algorithm (Zhang et al, NeurIPS 2020) if control_variates = False and chi > 0.
+
+    Parameters
+    ----------
+    y : dependent/response univariate variable
+    x : an n x d design matrix 
+    V : covariance matrix of the proposal distribution for the random-walk proposal
+    x0: initial parameter values
+    nburn : number of MCMC iterations for the burn-in period
+    npost : number of MCMC iterations for the post-burn-in period
+    model : it can be 'logistic', 'probit' and 'poisson'
+    implementation: either 'loop' or 'vectorised'
+
+    control_variates: control_variates == False results in the Tuna algorithm. If control_variates == True, then the MH_SS algorithm is run
+    chi : Tuna additional hyperparameter. In MH-SS, chi = 0. In the Tuna algorithm, chi > 0
+    taylor_order: order of the control-variates. It's either 1 or 2 for MH-SS, zero otherwise (i.e., Tuna algorithm)
+    phi_function: If phi_function == 'min', then gamma = 0 and the expectation of the Poisson auxiliary variable is optimally designed. On the other hand, phi_function == 'max' denotes gamma = 1
+    kappa : scaling parameter of the random-walk proposal distribution
+    nthin : Every nthin draw is kept to be returned to the user
+
+    
+    Returns
+    -------
+    parameters : a matrix with posterior samples
+    acc_rate : overall acceptance probability of the algorithm (i.e., alpha1 * alpha2)
+    acc_rate_ratio1 : Stage 1 acceptance probability  (i.e., alpha1 only)
+    BoverN : Average batch size over the total number of observations
+    cpu_time : how long it took to run (in seconds)
+    meanSJD : mean squared jump distance
+    ESS : effective sample size
+    chi : Tuna additional hyperparameter
+    N : number of observations
+    d : number of parameters
+    lambda : chi should be set so that lambda < 1 following the Tuna paper.
+    """
 
     n = len(y)
     d = len(x0)
@@ -770,7 +913,6 @@ def MH_SS(y, x, V, x0, chi, nburn, npost, control_variates, bound, model, implem
     theta_hat = x0
 
     control_variates = control_variates
-    bound = bound
     taylor_order = taylor_order
     model = model
 
@@ -904,4 +1046,3 @@ def MH_SS(y, x, V, x0, chi, nburn, npost, control_variates, bound, model, implem
             'N': n,
             'd': d,
             'lambda': save_lambda/npost}
-
