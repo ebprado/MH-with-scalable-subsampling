@@ -1,20 +1,4 @@
-import pandas as pd
-import os as os
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
-import seaborn as sns
-import scipy.special as sc
-import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.linear_model import LogisticRegression
-# --------------------------------------------------------------------------
-# make sure you have the algorithms.py file in the current directory!
-from algorithms import *
-# --------------------------------------------------------------------------
-
-# Link to the UCI machine learning repository 
-# https://archive.ics.uci.edu/dataset/322/gas+sensor+array+under+dynamic+gas+mixtures
+from PyMHSS import *
 
 dataset = 'sensor'
 model = 'logistic'
