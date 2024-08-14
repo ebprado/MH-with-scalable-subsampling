@@ -1,18 +1,5 @@
-import pandas as pd
-import os as os
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
-import seaborn as sns
-import scipy.special as sc
-# --------------------------------------------------------------------------
-# make sure you have the algorithms.py file in the current directory!
-from algorithms import *
-# --------------------------------------------------------------------------
+from PyMHSS import *
 
-# Link to the UCI machine learning repository 
-# https://archive.ics.uci.edu/dataset/347/hepmass
-# ------------------------------------------------------------------
 dataset = 'hepmass'
 model = 'logistic'
 
