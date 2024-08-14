@@ -1,12 +1,15 @@
 try:
     import numpy as np
+    import pandas as pd
+    from plotnine import *
     from tqdm import tqdm
     import statsmodels.api as sm
     import scipy.stats as scs
     import scipy.special as sc
     import tensorflow as tf
+    
 except ImportError:
-    raise ImportError("Please make sure numpy, tqdm, statsmodels, scipy and tensorflow are ALL installed!")
+    raise ImportError("Please make sure numpy, pandas, tqdm, statsmodels, scipy and tensorflow are ALL installed!")
 
 import pickle
 import time 
