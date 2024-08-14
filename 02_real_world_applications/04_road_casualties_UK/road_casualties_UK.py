@@ -4,25 +4,6 @@ import patsy
 dataset = 'collisions'
 model = 'poisson'
 
-# --------------------------------------------------------------------------
-# The datasets below can be obtained through the R package "stats19". 
-# Open an R script and uncomment the commands below.
-# --------------------------------------------------------------------------
-
-# install.packages('stats19')
-# library(stats19)
-
-# if(curl::has_internet()) {
-  
-#   dl_stats19(year = 2020, type = "casualty")
-#   dl_stats19(year = 2021, type = "casualty")
-#   dl_stats19(year = 2021, type = "casualty")
-  
-#   casualties_2020 = read_casualties(year = 2020)
-#   casualties_2021 = read_casualties(year = 2021)
-#   casualties_2022 = read_casualties(year = 2022)
-# }
-
 col_2020 = pd.read_csv('dft-road-casualty-statistics-collision-2020.csv', low_memory=False)
 col_2021 = pd.read_csv('dft-road-casualty-statistics-collision-2021.csv', low_memory=False)
 col_2022 = pd.read_csv('dft-road-casualty-statistics-collision-2022.csv', low_memory=False)
