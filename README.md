@@ -8,11 +8,11 @@ We created a Python package, `mhteste`, that needs to be installed before runnin
 
 * Option 1:
  ```python
- pip install -i https://test.pypi.org/simple/ mhssteste
+ pip install -i PyMHSS
  ```
  * Option 2:
  ```python
- python3 -m pip install -i https://test.pypi.org/simple/ mhssteste
+ python3 -m pip install -i PyMHSS
  ```
 # Repository folder structure
 
