@@ -1,19 +1,5 @@
-import pandas as pd
-import os as os
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
-import seaborn as sns
-import scipy.special as sc
+from PyMHSS import *
 import patsy
-import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, confusion_matrix
-# --------------------------------------------------------------------------
-# make sure you have the algorithms.py file in the current directory!
-from algorithms import *
-# --------------------------------------------------------------------------
 
 dataset = 'usa'
 model = 'logistic' 
@@ -68,11 +54,7 @@ x = (x - x_mean)/x_std
 x = np.asarray(x)
 d = x.shape[1]
 
-mod = LogisticRegression(solver='liblinear', random_state=0)
-mod.fit(x, y)
-mod.coef_
-
-theta_hat, V = get_theta_hat_and_var_cov_matrix(model, x, y, x0 = mod.coef_[0])
+theta_hat, V = get_theta_hat_and_var_cov_matrix(model, x, y)
 np.sum(logistic_grad_log_target_i(theta_hat, x, y), axis=0)
 
 theta_hat_file_name = dir + str(dataset) + model + 'theta_hat' + '.pickle'
@@ -83,10 +65,6 @@ save_file(V, V_file_name)
 
 theta_hat = open_file(theta_hat_file_name)
 V = open_file(V_file_name)
-
-p_hat = (1 / (1 + np.exp(-x @ theta_hat)))
-sns.kdeplot(p_hat)
-plt.show()
 
 nburn = 0
 npost = 100000
