@@ -1,4 +1,4 @@
-description = "Metropolis-Hastings with Scalable Subsampling."
+description = "Python package to run the Metropolis-Hastings with Scalable Subsampling (MH-SS) algorithm."
 license = {file = "LICENSE.txt"}
 keywords = ["Metropolis-Hastings with Scalable Subsampling", "Tuna Metropolis-Hastings algorithm", "Scalable Metropolis-Hastings"]
 
@@ -7,7 +7,7 @@ requires = ["setuptools == 68.2.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mhssteste"
+name = "PyMHSS"
 readme = "README.md"
 version = "0.0.2"
 dependencies = [
@@ -15,6 +15,7 @@ dependencies = [
     "tqdm",
     "scipy",
     "plotnine",
+    "pandas",
 ]
 
 authors = [

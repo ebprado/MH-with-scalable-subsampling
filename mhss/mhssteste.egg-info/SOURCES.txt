@@ -1,9 +1,0 @@
-README.md
-pyproject.toml
-mhssteste/__init__.py
-mhssteste/algorithms.py
-mhssteste.egg-info/PKG-INFO
-mhssteste.egg-info/SOURCES.txt
-mhssteste.egg-info/dependency_links.txt
-mhssteste.egg-info/requires.txt
-mhssteste.egg-info/top_level.txt

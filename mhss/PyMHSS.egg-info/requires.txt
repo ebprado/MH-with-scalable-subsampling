@@ -2,3 +2,4 @@ tensorflow
 tqdm
 scipy
 plotnine
+pandas

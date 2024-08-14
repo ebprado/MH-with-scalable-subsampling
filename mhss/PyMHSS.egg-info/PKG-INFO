@@ -1,5 +1,5 @@
 Metadata-Version: 2.1
-Name: mhssteste
+Name: PyMHSS
 Version: 0.0.2
 Author: Estevao Prado, Christopher Nemeth, Chris Sherlock
 Maintainer-email: Estevao Prado <e.prado1@lancaster.ac.uk>
@@ -10,6 +10,7 @@ Requires-Dist: tensorflow
 Requires-Dist: tqdm
 Requires-Dist: scipy
 Requires-Dist: plotnine
+Requires-Dist: pandas
 
 Python package that can be used to reproduce the figures and tables presented in [Prado, E.B., Nemeth, C. & Sherlock, C. Metropolis-Hastings with Scalable Subsampling. arxiv (2024)][mhss_paper].
 
