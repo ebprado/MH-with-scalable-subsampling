@@ -1,13 +1,8 @@
-try:
-    from plotnine import *
-    import pandas as pd
-    from mhssteste import *
-except ImportError:
-    raise ImportError("Please make sure plotnine, pandas and mhssteste are ALL installed!")
+from PyMHSS import *
 
 save_dir = os.getcwd() + '/'
 
-def get_results(N, which_figure, rep=10):
+def get_results(N, rep=10):
 
     set_d = np.array([10, 30, 50, 100])
     colnames = np.array(['N','d', 'kappa', 'acc_rate', 'meanSJD', 'cpu_time', 'ESS', 'expected_B', 'method', 'acc_rate_ratio1'])

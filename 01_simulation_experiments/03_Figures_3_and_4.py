@@ -1,9 +1,4 @@
-try:
-    from plotnine import *
-    import pandas as pd
-    from mhssteste import *
-except ImportError:
-    raise ImportError("Please make sure plotnine, pandas and mhssteste are ALL installed!")
+from PyMHSS import *
 
 save_dir = os.getcwd() + '/'
 
@@ -94,9 +89,6 @@ def get_results(N, which_figure, rep=10):
         store_results['method'] = pd.Categorical(store_results.method, categories= ['MH-SS-1', 'MH-SS-2', 'RWM'])
     elif which_figure == 4:
         store_results['method'] = pd.Categorical(store_results.method, categories= ['MH-SS-1', 'MH-SS-2'])
-
-    # store_results['method'] = pd.Categorical(store_results.method, categories= ['MH-SS-1', 'MH-SS-2', 'SMH-1', 'SMH-2', 'SMH-1-NB', 'SMH-2-NB', 'RWM'])
-    # store_results['method'] = pd.Categorical(store_results.method, categories= ['MH-SS-1', 'MH-SS-2', 'SMH-1', 'SMH-2', 'RWM'])
     
     return store_results
 

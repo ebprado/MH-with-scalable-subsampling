@@ -1,9 +1,4 @@
-try:
-    from plotnine import *
-    import pandas as pd
-    from mhssteste import *
-except ImportError:
-    raise ImportError("Please make sure plotnine, pandas and mhssteste are ALL installed!")
+from PyMHSS import *
 
 save_dir = os.getcwd() + '/'
 
@@ -23,7 +18,7 @@ def run_tuna(y, x, theta_hat, V, taylor_order, npost, model, implementation, kap
             chi = 8e-5
             kappa = 0.028
 
-    method = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, bound = 'new', phi_function='original', taylor_order=taylor_order, model=model, chi=chi, nburn=0, npost=npost, kappa=kappa, nthin=nthin, implementation=implementation)
+    method = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, phi_function='original', taylor_order=taylor_order, model=model, chi=chi, nburn=0, npost=npost, kappa=kappa, nthin=nthin, implementation=implementation)
     acc_rate = method.get('acc_rate')
     acc_rate_ratio1 = method.get('acc_rate_ratio1')
     meanSJD = method.get('meanSJD')
@@ -54,9 +49,9 @@ def run_MH_SS(y, x, V, theta_hat, taylor_order, npost, model, implementation, ch
     N = x.shape[0]
     d = x.shape[1]
     if taylor_order == 0:
-        method = MH_SS(y, x, V=V, x0 = theta_hat, model=model, control_variates=False, bound = 'original', taylor_order=taylor_order, chi=chi, nburn=0, npost=npost, kappa=kappa, implementation=implementation)    
+        method = MH_SS(y, x, V=V, x0 = theta_hat, model=model, control_variates=False, taylor_order=taylor_order, chi=chi, nburn=0, npost=npost, kappa=kappa, implementation=implementation)    
     else:
-        method = MH_SS(y, x, V=V, x0 = theta_hat, model=model, control_variates=True, bound = 'new', taylor_order=taylor_order, chi=chi, nburn=0, npost=npost, kappa=kappa, implementation=implementation)
+        method = MH_SS(y, x, V=V, x0 = theta_hat, model=model, control_variates=True, taylor_order=taylor_order, chi=chi, nburn=0, npost=npost, kappa=kappa, implementation=implementation)
     acc_rate = method.get('acc_rate')
     acc_rate_ratio1 = method.get('acc_rate_ratio1')
     meanSJD = method.get('meanSJD')

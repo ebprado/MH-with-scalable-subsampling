@@ -1,9 +1,4 @@
-try:
-    from plotnine import *
-    import pandas as pd
-    from mhssteste import *
-except ImportError:
-    raise ImportError("Please make sure plotnine, pandas and mhssteste are ALL installed!")
+from PyMHSS import *
 
 save_dir = os.getcwd() + '/'
 
@@ -36,7 +31,7 @@ def run_tuna(x, y, theta_hat, V, taylor_order, npost, model, implementation, kap
             chi = 1e-5
             kappa = 0.1
 
-    method = MH_SS(y, x, V, x0 = theta_hat, model=model, control_variates=False, taylor_order = taylor_order, bound = 'new', chi=chi, nburn=0, npost=npost, kappa=kappa,implementation=implementation)
+    method = MH_SS(y, x, V, x0 = theta_hat, model=model, control_variates=False, taylor_order = taylor_order, chi=chi, nburn=0, npost=npost, kappa=kappa,implementation=implementation)
     acc_rate = method.get('acc_rate')
     acc_rate_ratio1 = method.get('acc_rate_ratio1')
     meanSJD = method.get('meanSJD')

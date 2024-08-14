@@ -1,9 +1,4 @@
-try:
-    from plotnine import *
-    import pandas as pd
-    from mhssteste import *
-except ImportError:
-    raise ImportError("Please make sure plotnine, pandas and mhssteste are ALL installed!")
+from PyMHSS import *
 
 save_dir = os.getcwd() + '/'
 
@@ -100,9 +95,9 @@ def run_MH_SS(x, y, theta_hat, V, taylor_order, npost, model, implementation, ka
                 chi = 1.5e-5
     # Tuna = MH-SS without control variates (control_variates = False) and phi_function='original'
     if taylor_order == 0:
-        method = MH_SS(y, x, V, x0 = theta_hat, model=model, control_variates=False, bound = 'new', phi_function='original', taylor_order=taylor_order, chi=chi, nburn=0, npost=npost, kappa=kappa, nthin=10**3, implementation=implementation)    
+        method = MH_SS(y, x, V, x0 = theta_hat, model=model, control_variates=False, phi_function='original', taylor_order=taylor_order, chi=chi, nburn=0, npost=npost, kappa=kappa, nthin=10**3, implementation=implementation)    
     else:
-        method = MH_SS(y, x, V, x0 = theta_hat, model=model, control_variates=True, bound = 'new', taylor_order=taylor_order, chi=0, nburn=0, npost=npost, kappa=kappa, implementation=implementation)
+        method = MH_SS(y, x, V, x0 = theta_hat, model=model, control_variates=True, taylor_order=taylor_order, chi=0, nburn=0, npost=npost, kappa=kappa, implementation=implementation)
 
     acc_rate = method.get('acc_rate')
     acc_rate_ratio1 = method.get('acc_rate_ratio1')

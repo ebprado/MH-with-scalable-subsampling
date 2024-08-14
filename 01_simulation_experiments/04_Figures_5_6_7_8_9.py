@@ -1,9 +1,4 @@
-try:
-    from plotnine import *
-    import pandas as pd
-    from mhssteste import *
-except ImportError:
-    raise ImportError("Please make sure plotnine, pandas and mhssteste are ALL installed!")
+from PyMHSS import *
 
 def organise_outputs(type_plot, implementation):
 
@@ -16,7 +11,6 @@ def organise_outputs(type_plot, implementation):
     else:
         store_results = store_results[(store_results['method'] != 'RWM') & (store_results['method'] != 'Tuna')]
         categories_method = ['MH-SS-1', 'MH-SS-2', 'SMH-1', 'SMH-2', 'SMH-1-NB', 'SMH-2-NB']
-
 
     store_results['ESS'] = store_results.ESS.astype(float)
     store_results['cpu_time'] = store_results.cpu_time.astype(float)

@@ -1,9 +1,4 @@
-try:
-    from plotnine import *
-    import pandas as pd
-    from mhssteste import *
-except ImportError:
-    raise ImportError("Please make sure plotnine, pandas and mhssteste are ALL installed!")
+from PyMHSS import *
 
 save_dir = os.getcwd() + '/'
 
@@ -22,9 +17,9 @@ def run_MH_SS(N, d, cv, chi = -1, npost=100000, rep = 10, model = 'logistic', im
 
         if cv == True:
 
-            mh_ss_min_cv1 = MH_SS(y, x, V, x0 = theta_hat, control_variates=cv, bound = 'new', model=model, phi_function = 'min', taylor_order = 1, chi=0, nburn=0, npost=npost, implementation=implementation)
-            mh_ss_max_cv1 = MH_SS(y, x, V, x0 = theta_hat, control_variates=cv, bound = 'new', model=model, phi_function = 'max', taylor_order = 1, chi=0, nburn=0, npost=npost, implementation=implementation)
-            mh_ss_ori_cv1 = MH_SS(y, x, V, x0 = theta_hat, control_variates=cv, bound = 'new', model=model, phi_function = 'original', taylor_order = 1, chi=0, nburn=0, npost=npost, implementation=implementation)
+            mh_ss_min_cv1 = MH_SS(y, x, V, x0 = theta_hat, control_variates=cv, model=model, phi_function = 'min', taylor_order = 1, chi=0, nburn=0, npost=npost, implementation=implementation)
+            mh_ss_max_cv1 = MH_SS(y, x, V, x0 = theta_hat, control_variates=cv, model=model, phi_function = 'max', taylor_order = 1, chi=0, nburn=0, npost=npost, implementation=implementation)
+            mh_ss_ori_cv1 = MH_SS(y, x, V, x0 = theta_hat, control_variates=cv, model=model, phi_function = 'original', taylor_order = 1, chi=0, nburn=0, npost=npost, implementation=implementation)
 
             chi = 0
 
@@ -41,9 +36,9 @@ def run_MH_SS(N, d, cv, chi = -1, npost=100000, rep = 10, model = 'logistic', im
 
             # Tuna = MH-SS without control variates and phi_function = 'original'
 
-            tuna_min = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, bound='', model=model,  phi_function = 'min', chi=chi, nburn=0, npost=npost)
-            tuna_max = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, bound='', model=model,  phi_function = 'max', chi=chi, nburn=0, npost=npost)
-            tuna_ori = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, bound='', model=model,  phi_function = 'original', chi=chi, nburn=0, npost=npost)
+            tuna_min = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, model=model,  phi_function = 'min', chi=chi, nburn=0, npost=npost)
+            tuna_max = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, model=model,  phi_function = 'max', chi=chi, nburn=0, npost=npost)
+            tuna_ori = MH_SS(y, x, V, x0 = theta_hat, control_variates=False, model=model,  phi_function = 'original', chi=chi, nburn=0, npost=npost)
 
             acc_rate_min = tuna_min.get('acc_rate')
             acc_rate_max = tuna_max.get('acc_rate')
@@ -125,7 +120,7 @@ test_cv = pd.concat([test1_cv, test2_cv, test3_cv])
 # Figure 2
 # --------------------------------------------------------------
 
-plot = (ggplot(test_cv[test_cv['method'] == 'Tuna+CV-1']) +
+plot = (ggplot(test_cv[test_cv['method'] == 'MH-SS-1']) +
 aes(x='d', y='value', colour='variable') +
 geom_boxplot() +
 labs(y = 'Acceptance rate',
