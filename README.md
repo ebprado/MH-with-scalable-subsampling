@@ -83,3 +83,24 @@ Ideally, we would have liked to have all datasets analysed in the paper within t
    * Python Package containing the implementation of the Metropolis-Hastings with Scalable Subsampling (MH-SS), random-walk Metropolis-Hastings (RWM), [Scalable Metropolis-Hastings (SMH)](http://proceedings.mlr.press/v97/cornish19a/cornish19a.pdf) and [TunaMH](https://proceedings.neurips.cc/paper/2020/file/e2a7555f7cabd6e31aef45cb8cda4999-Paper.pdf). The main functions are documented and can be found in `main` > `PyMHSS` > `algorithms.py`.
 
   * We implemented all algorithms using two strategies: `loop` and `vectorised` operations. All results in the main paper used for-loop operations to evaluate the likelihood terms. This strategy is generally slower, but it does make all algorithms comparable. In the Appendices, we show a comparison between `loop` and `vectorised` operations in the context of our simulations. As stated in the paper, we decided to adopt `loop` operations for the sake of having a fair comparison in the run-times amongst the considered algorithms due to the way the SMH algorithm, which is implemented in C++, is designed.
+
+## Python Package (`PyMHSS`)
+
+The `PyMHSS` package implements several Markov Chain Monte Carlo (MCMC) algorithms:
+
+* **Metropolis-Hastings with Scalable Subsampling (MH-SS)**: A scalable implementation of the MH-SS algorithm.
+* **Random-Walk Metropolis-Hastings (RWM)**: A standard MCMC algorithm using random walk proposals.
+* **Scalable Metropolis-Hastings (SMH)**: The SMH algorithm, implemented in C++ and integrated with Python for seamless usage.
+* **TunaMH**: Another efficient MCMC algorithm designed for large-scale Bayesian inference.
+
+The main functions of `PyMHSS` can be found in the documentation within the `main > PyMHSS > algorithms.py` file.
+
+## Implementation Strategies
+
+We implemented all algorithms using two primary strategies:
+
+* **For-loop operations**: This approach is generally slower but allows for a fair comparison among algorithms. It was used for results presented in the main paper.
+* **Vectorised operations**: A faster strategy that can be more efficient, especially for large-scale simulations.
+
+As detailed in the appendices of our paper, we compared the performance of both strategies and opted to use for-loop operations to maintain fairness in comparing algorithm runtimes. This decision was made due to the design of the SMH algorithm, which is 
+implemented in C++ and integrated with Python through `PyMHSS`.
