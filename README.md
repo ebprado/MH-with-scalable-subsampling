@@ -1,20 +1,22 @@
-# Metropolis-Hastings with Scalable Subsampling
+# PyMHSS: A Python package that implements Metropolis-Hastings algorithms with Scalable Sampling
 
-This repository houses Python scripts that can be used to reproduce the results of simulation experiments and real-world applications presented in [Prado, E.B., Nemeth, C. & Sherlock, C. Metropolis-Hastings with Scalable Subsampling. arxiv (2024)](https://arxiv.org/pdf/2407.19602). In an attempt to facilitate reproducibility, we created a Python package (see intructions below) and organised/named the scripts following the figures or tables their outputs are associated with. For any questions or issues, please refer to the contact information included in this repository.
+## Introduction
+The `PyMHSS` package provides a set of Python scripts to reproduce the results of simulation experiments and real-world applications presented in [Prado, E.B., Nemeth, C. & Sherlock, C. Metropolis-Hastings with Scalable Subsampling. arxiv 
+(2024)](https://arxiv.org/pdf/2407.19602).
 
-Ideally, we would have liked to have all datasets analysed in the paper in this repository. However, some of them are too big to be stored here. The US census dataset is the only one provided in this repository. The datasets detection of gas mixtures and high-energy particle physics can be found in the [UCI machine learning repository](https://archive.ics.uci.edu/); see the links below.
+## Installation
+To install PyMHSS, use `pip` or `python3 -m pip`:
 
-We created a Python package, `PyMHSS`, that needs to be installed before running the scripts. This can downloaded from [TestPyPI](https://test.pypi.org/) via `pip` or `pip3` using the following commands:
+* Option 1: `pip install PyMHSS`
+* Option 2: `python3 -m pip install PyMHSS`
 
-* Option 1:
- ```python
- pip install -i PyMHSS
- ```
- * Option 2:
- ```python
- python3 -m pip install -i PyMHSS
- ```
-# Repository folder structure
+## Repository folder structure
+
+The repository is organised into three main folders:
+
+* **Simulation Experiments**: Provides scripts to reproduce figures and tables from both the main paper and supplementary material. For added convenience, script names follow the same sequence as figure and table references in the original text.
+* **Real-world Applications**: Houses datasets and scripts to reproduce results presented in the paper.
+* **PyMHSS**: A Python package that enables running all results mentioned in the paper.
 
 ## Simulation experiments
 
@@ -35,6 +37,8 @@ We created a Python package, `PyMHSS`, that needs to be installed before running
 * `06_Figure_10.py`: Acceptance rates and mean squared jumping distance (MSJD) over E(B) based on a simulation experiment with a logistic regression model with dimension $d = 100$ and $n=100,000$.
 
 ## Real-world applications
+
+Ideally, we would have liked to have all datasets analysed in the paper within this repository. However, some of them are too big to be stored here. The US census dataset is the only one provided in this repository. The datasets detection of gas mixtures and high-energy particle physics can be found in the [UCI machine learning repository](https://archive.ics.uci.edu/); see the links below.
 
 ### U.S. population survey 
 * `usa_pop_survey_data.zip`: The 2018 United States Current Population Survey is a monthly household survey carried out by the U.S. Census Bureau and the U.S. Bureau of Labor Statistics that gathers information on the labour force for the population of the U.S. The data contain variables such as income, education, occupation, participation in welfare programs and health insurance.
@@ -74,8 +78,22 @@ We created a Python package, `PyMHSS`, that needs to be installed before running
     }
     ```
 
+## PyMHSS
 
-## mhssteste
-   * Python Package containing the implementation of the Metropolis-Hastings with Scalable Subsampling (MH-SS), random-walk Metropolis-Hastings (RWM), [Scalable Metropolis-Hastings (SMH)](http://proceedings.mlr.press/v97/cornish19a/cornish19a.pdf) and [TunaMH](https://proceedings.neurips.cc/paper/2020/file/e2a7555f7cabd6e31aef45cb8cda4999-Paper.pdf).
+The `PyMHSS` package implements several Markov Chain Monte Carlo (MCMC) algorithms:
 
-  * We implemented all algorithms using two strategies: `loop` and `vectorised` operations. All results in the main paper used for-loop operations to evaluate the likelihood terms. This strategy is generally slower, but it does make all algorithms comparable. In the Appendices, we show a comparison between `loop` and `vectorised` operations in the context of our simulations. As stated in the paper, we decided to adopt `loop` operations for the sake of having a fair comparison in the run-times amongst the considered algorithms due to the way the SMH algorithm, which is implemented in C++, is designed.
+* **Metropolis-Hastings with Scalable Subsampling (MH-SS)**
+* **Random-walk Metropolis (RWM)**
+* **Scalable Metropolis-Hastings [(SMH)](http://proceedings.mlr.press/v97/cornish19a/cornish19a.pdf)**
+* **[TunaMH](https://proceedings.neurips.cc/paper/2020/file/e2a7555f7cabd6e31aef45cb8cda4999-Paper.pdf)**
+
+The main functions of `PyMHSS` can be found within the `main > PyMHSS > algorithms.py` file.
+
+### Implementation Strategies
+
+We implemented all algorithms using two primary strategies:
+
+* **For-loop operations**: This approach is generally slower but allows for a fair comparison among algorithms. It was used for results presented in the main paper.
+* **Vectorised operations**: A faster strategy that can be more efficient, especially for large-scale simulations.
+
+As detailed in the appendices of our paper, we compared the performance of both strategies and opted to use for-loop operations to maintain fairness in comparing algorithm runtimes. This decision was made due to the design of the SMH algorithm, which rejects proposal based on point-wise evaluations of the likelihood.
