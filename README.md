@@ -88,10 +88,10 @@ Ideally, we would have liked to have all datasets analysed in the paper within t
 
 The `PyMHSS` package implements several Markov Chain Monte Carlo (MCMC) algorithms:
 
-* **Metropolis-Hastings with Scalable Subsampling (MH-SS)**: A scalable implementation of the MH-SS algorithm.
-* **Random-Walk Metropolis-Hastings (RWM)**: A standard MCMC algorithm using random walk proposals.
-* **Scalable Metropolis-Hastings (SMH)**: The SMH algorithm, implemented in C++ and integrated with Python for seamless usage.
-* **TunaMH**: Another efficient MCMC algorithm designed for large-scale Bayesian inference.
+* **Metropolis-Hastings with Scalable Subsampling (MH-SS)**
+* **Random-Walk Metropolis-Hastings (RWM)**
+* **Scalable Metropolis-Hastings (SMH)**
+* **TunaMH**
 
 The main functions of `PyMHSS` can be found in the documentation within the `main > PyMHSS > algorithms.py` file.
 
