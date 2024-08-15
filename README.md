@@ -84,7 +84,7 @@ Ideally, we would have liked to have all datasets analysed in the paper within t
 
   * We implemented all algorithms using two strategies: `loop` and `vectorised` operations. All results in the main paper used for-loop operations to evaluate the likelihood terms. This strategy is generally slower, but it does make all algorithms comparable. In the Appendices, we show a comparison between `loop` and `vectorised` operations in the context of our simulations. As stated in the paper, we decided to adopt `loop` operations for the sake of having a fair comparison in the run-times amongst the considered algorithms due to the way the SMH algorithm, which is implemented in C++, is designed.
 
-## Python Package (`PyMHSS`)
+## PyMHSS
 
 The `PyMHSS` package implements several Markov Chain Monte Carlo (MCMC) algorithms:
 
@@ -95,7 +95,7 @@ The `PyMHSS` package implements several Markov Chain Monte Carlo (MCMC) algorith
 
 The main functions of `PyMHSS` can be found in the documentation within the `main > PyMHSS > algorithms.py` file.
 
-## Implementation Strategies
+### Implementation Strategies
 
 We implemented all algorithms using two primary strategies:
 
