@@ -7,8 +7,8 @@ The `PyMHSS` package provides a set of Python scripts to reproduce the results o
 ## Installation
 To install PyMHSS, use `pip` or `python3 -m pip`:
 
-* Option 1: `pip install -i PyMHSS`
-* Option 2: `python3 -m pip install -i PyMHSS`
+* Option 1: `pip install PyMHSS`
+* Option 2: `python3 -m pip install PyMHSS`
 
 ## Repository folder structure
 
