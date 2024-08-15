@@ -16,7 +16,7 @@ The repository is organised into three main folders:
 
 * **Simulation Experiments**: Provides scripts to reproduce figures and tables from both the main paper and supplementary material. For added convenience, script names follow the same sequence as figure and table references in the original text.
 * **Real-world Applications**: Houses datasets and scripts to reproduce results presented in the paper.
-* **`PyMHSS`**: A Python package that enables running all results mentioned in the paper.
+* **PyMHSS**: A Python package that enables running all results mentioned in the paper.
 
 ## Simulation experiments
 
