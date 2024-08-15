@@ -163,18 +163,18 @@ def L2_norm_matrix(x):
     return np.linalg.norm(x,2,1)
 
 def logistic_log_target_i(beta, y, x):
-    """ Log of the likelihood of a logistic regression model """
+    """ Log-likelihood of a logistic regression model """
     betaTx = x @ beta
     log_lik = -np.log(1+ np.exp(betaTx)) + betaTx * y
     return log_lik
 
 def logistic_grad_log_target_i(beta, x, y):
-    """ Gradient of the log of the likelihood of a logistic regression model """
+    """ Gradient of the log-likelihood of a logistic regression model """
     gradient_log_lik = x * (y - 1 / (1 + np.exp(-x @ beta)))[:, None]
     return gradient_log_lik
 
 def logistic_hessian_log_target_i(beta, x, y):
-    """ Hessian of the log of the likelihood of a logistic regression model """
+    """ Hessian of the log-likelihood of a logistic regression model """
     nrow = len(y)
     prob = 1/(1 + np.exp(-x @ beta))
     aux = prob*(1-prob)
@@ -182,14 +182,14 @@ def logistic_hessian_log_target_i(beta, x, y):
     return hessian_log_lik, -aux
 
 def probit_log_target_i(beta, y, x):
-    """ Log of the likelihood of a probit regression model """
+    """ Log-likelihood of a probit regression model """
     eta = x @ beta
     PHI = scs.norm.cdf(eta)   
     log_lik = y * np.log(PHI) + (1 - y) * np.log(1 - PHI)
     return log_lik
 
 def probit_grad_log_target_i(beta, x, y):
-    """ Gradient of the log of the likelihood of a probit regression model """
+    """ Gradient of the log-likelihood of a probit regression model """
     eta = x @ beta
     phi = scs.norm.pdf(eta)
     PHI = scs.norm.cdf(eta)
@@ -197,7 +197,7 @@ def probit_grad_log_target_i(beta, x, y):
     return gradient_log_lik
 
 def probit_hessian_log_target_i(beta, x, y):
-    """ Hessian of the log of the likelihood of a probit regression model """
+    """ Hessian of the log-likelihood of a probit regression model """
     nrow = len(y)
     eta = x @ beta
     phi = scs.norm.pdf(eta)
@@ -207,14 +207,14 @@ def probit_hessian_log_target_i(beta, x, y):
     return hessian_log_lik, aux
 
 def poisson_log_target_i(beta, y, x):
-    """ Log of the likelihood of a poisson regression model with expectation log (1 + exp (x * beta))"""
+    """ Log-likelihood of a poisson regression model with expectation log (1 + exp (x * beta))"""
     eta = x @ beta
     lambda_poisson = np.log(1 + np.exp(eta))
     log_lik = y * np.log(lambda_poisson) - lambda_poisson - sc.gammaln(y + 1)
     return log_lik
 
 def poisson_grad_log_target_i(beta, x, y):
-    """ Gradient of the log of the likelihood of a poisson regression model with expectation log (1 + exp (x * beta))"""
+    """ Gradient of the log-likelihood of a poisson regression model with expectation log (1 + exp (x * beta))"""
     eta = x @ beta
     lambda_poisson = np.log(1 + np.exp(eta))
     gradient_log_lik = x * ((y / lambda_poisson - 1) * (1 / (1 + np.exp(-eta))))[:, None]
@@ -222,7 +222,7 @@ def poisson_grad_log_target_i(beta, x, y):
     return gradient_log_lik
 
 def poisson_hessian_log_target_i(beta, x, y):
-    """ Hessian of the log of the likelihood of a poisson regression model with expectation log (1 + exp (x * beta))"""
+    """ Hessian of the log-likelihood of a poisson regression model with expectation log (1 + exp (x * beta))"""
     nrow = len(y)
     eta = x @ beta
     exp_eta = np.exp(eta)
@@ -231,7 +231,7 @@ def poisson_hessian_log_target_i(beta, x, y):
     return hessian_log_lik, aux
 
 def sgd(grad_log_target, x, y, k, x0 = None, tol=1e-10):
-    """ Implementation of the stochastic gradient descent algorithm """
+    """ Our own implementation of the stochastic gradient descent algorithm """
 
     n = len(y)
     d = x.shape[1]
@@ -313,7 +313,8 @@ def sgd_tf(grad_log_target_i, x, y, x0 = None, basic_lr = None, tol=1e-7, iter_m
     if basic_lr is None:
         basic_lr = 1/N
 
-    optimizer = tf.keras.optimizers.legacy.SGD(learning_rate = basic_lr)
+    optimizer = tf.keras.optimizers.SGD(learning_rate = basic_lr)
+    # optimizer = tf.keras.optimizers.legacy.SGD(learning_rate = basic_lr)
     # optimizer = tf.keras.optimizers.legacy.Adam(learning_rate = basic_lr)
     j = 0
 
@@ -340,7 +341,6 @@ def sgd_tf(grad_log_target_i, x, y, x0 = None, basic_lr = None, tol=1e-7, iter_m
 def effective_sample_size(x):
 
     """ Implementation of the positive and monotone sequence to calculate effective sample size; see Section 3.3 of Geyer (1992) """
-
     
     nrow = len(x)
     ncol = x.shape[1]
@@ -380,8 +380,8 @@ def effective_sample_size(x):
 
 def define_target_and_bounds(x, y, theta_hat, model, control_variates, taylor_order):
 
-    """ Define all the terms in | l(theta) - l(theta') - r(theta, theta') <= c_i M(theta, theta') based on the corresponding model,
-        except for M(theta, theta').
+    """ Define all the terms in | l(theta) - l(theta') - r(theta, theta') <= c_i M(theta, theta')
+        based on the corresponding model, except for M(theta, theta').
     """
 
     if model == 'logistic':
@@ -459,8 +459,8 @@ def define_target_and_bounds(x, y, theta_hat, model, control_variates, taylor_or
     return U, c_i, log_target_i, sum_grad_at_theta_hat, sum_hess_at_theta_hat
 
 def M_theta_theta_prime(theta, theta_prime, theta_hat, control_variates, taylor_order):
-    """ Define M(theta, theta').
-    """
+    
+    """ Define M(theta, theta') """
 
     if control_variates == True:
 
@@ -882,7 +882,6 @@ def MH_SS(y, x, V, x0, nburn, npost, model, implementation, control_variates = T
     phi_function: If phi_function == 'min', then gamma = 0 and the expectation of the Poisson auxiliary variable is optimally designed. On the other hand, phi_function == 'max' denotes gamma = 1
     kappa : scaling parameter of the random-walk proposal distribution
     nthin : Every nthin draw is kept to be returned to the user
-
     
     Returns
     -------
