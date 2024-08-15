@@ -2,7 +2,7 @@ from PyMHSS import *
 
 save_dir = os.getcwd() + '/'
 
-def run_MH_SS(N, d, cv, chi = -1, npost=100000, rep = 10, model = 'logistic', implementation='loop'):
+def run_MH_SS(N, d, cv, chi = -1, npost=100000, rep = 10, model = 'logistic', implementation='vectorised'):
     
     for k in range(rep):
         print(str(k + 1) + ' out of ' + str(rep))
