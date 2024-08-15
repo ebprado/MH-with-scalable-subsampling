@@ -33,7 +33,7 @@ To install PyMHSS, use `pip` or `python3 -m pip`:
 
 ## Real-world applications
 
-Ideally, we would have liked to have all datasets analysed in the paper in this repository. However, some of them are too big to be stored here. The US census dataset is the only one provided in this repository. The datasets detection of gas mixtures and high-energy particle physics can be found in the [UCI machine learning repository](https://archive.ics.uci.edu/); see the links below.
+Ideally, we would have liked to have all datasets analysed in the paper in this repository. However, some of them are too big to be stored here. The US census dataset is the only one provided in this repository. The datasets detection of gas mixtures and high-energy particle physics can be found in the [UCI machine learning repository](https://archive.ics.uci.edu/); see the links below. We now describe below the
 
 ### U.S. population survey 
 * `usa_pop_survey_data.zip`: The 2018 United States Current Population Survey is a monthly household survey carried out by the U.S. Census Bureau and the U.S. Bureau of Labor Statistics that gathers information on the labour force for the population of the U.S. The data contain variables such as income, education, occupation, participation in welfare programs and health insurance.
