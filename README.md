@@ -102,5 +102,4 @@ We implemented all algorithms using two primary strategies:
 * **For-loop operations**: This approach is generally slower but allows for a fair comparison among algorithms. It was used for results presented in the main paper.
 * **Vectorised operations**: A faster strategy that can be more efficient, especially for large-scale simulations.
 
-As detailed in the appendices of our paper, we compared the performance of both strategies and opted to use for-loop operations to maintain fairness in comparing algorithm runtimes. This decision was made due to the design of the SMH algorithm, which is 
-implemented in C++ and integrated with Python through `PyMHSS`.
+As detailed in the appendices of our paper, we compared the performance of both strategies and opted to use for-loop operations to maintain fairness in comparing algorithm runtimes. This decision was made due to the design of the SMH algorithm, which is originally implemented in C++.
