@@ -90,8 +90,8 @@ The `PyMHSS` package implements several Markov Chain Monte Carlo (MCMC) algorith
 
 * **Metropolis-Hastings with Scalable Subsampling (MH-SS)**
 * **Random-Walk Metropolis-Hastings (RWM)**
-* **Scalable Metropolis-Hastings (SMH)**
-* **TunaMH**
+* **Scalable Metropolis-Hastings [(SMH)](http://proceedings.mlr.press/v97/cornish19a/cornish19a.pdf)**
+* **[TunaMH](https://proceedings.neurips.cc/paper/2020/file/e2a7555f7cabd6e31aef45cb8cda4999-Paper.pdf)**
 
 The main functions of `PyMHSS` can be found in the documentation within the `main > PyMHSS > algorithms.py` file.
 
