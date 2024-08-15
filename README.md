@@ -1,4 +1,4 @@
-# PyMHSS: A Python package that implements Metropolis-Hastings with Scalable Sampling algorithms
+# PyMHSS: A Python package that implements Metropolis-Hastings algorithms with Scalable Sampling
 
 ## Introduction
 The `PyMHSS` package provides a set of Python scripts to reproduce the results of simulation experiments and real-world applications presented in [Prado, E.B., Nemeth, C. & Sherlock, C. Metropolis-Hastings with Scalable Subsampling. arxiv 
