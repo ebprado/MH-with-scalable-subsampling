@@ -2,7 +2,7 @@
 
 ## Introduction
 The `PyMHSS` package provides a set of Python scripts to reproduce the results of simulation experiments and real-world applications presented in [Prado, E.B., Nemeth, C. & Sherlock, C. Metropolis-Hastings with Scalable Subsampling. arxiv 
-(2024)](https://arxiv.org/pdf/2407.19602). The package is designed to facilitate reproducibility.
+(2024)](https://arxiv.org/pdf/2407.19602).
 
 ## Installation
 To install PyMHSS, use `pip` or `python3 -m pip`:
@@ -14,7 +14,7 @@ To install PyMHSS, use `pip` or `python3 -m pip`:
 
 The repository is organised into three main folders:
 
-* **Simulation Experiments**: Contains scripts for reproducing figures and tables from both the main paper and supplementary material.
+* **Simulation Experiments**: Provides scripts to reproduce figures and tables from both the main paper and supplementary material. For added convenience, script names follow the same sequence as figure and table references in the original text.
 * **Real-world Applications**: Houses datasets and scripts to reproduce results presented in the paper.
 * **`PyMHSS`**: A Python package that enables running all results mentioned in the paper.
 
