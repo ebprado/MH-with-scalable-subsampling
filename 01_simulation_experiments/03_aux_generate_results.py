@@ -97,7 +97,7 @@ def run_methods(N, d, set_kappa, rep=2, npost=100000, model='logistic', implemen
             smh2_chris = pd.DataFrame(smh2_chris_save_results, columns=colnames)
 
             mhss1_file_name = save_dir + 'ScalingParameterMHSS1' + "N" + str(N) + 'd' + str(d) + 'Rep' + str(i) + '.pickle'
-            mhss2_file_name = save_dir + 'ScalingParameterMHSS1' + "N" + str(N) + 'd' + str(d) + 'Rep' + str(i) + '.pickle'
+            mhss2_file_name = save_dir + 'ScalingParameterMHSS2' + "N" + str(N) + 'd' + str(d) + 'Rep' + str(i) + '.pickle'
             rwm_file_name = save_dir + 'ScalingParameterRWM' + "N" + str(N) + 'd' + str(d) + 'Rep' + str(i) + '.pickle'
             smh1_file_name = save_dir + 'ScalingParameterSMH1' + "N" + str(N) + 'd' + str(d) + 'Rep' + str(i) + '.pickle'
             smh2_file_name = save_dir + 'ScalingParameterSMH2' + "N" + str(N) + 'd' + str(d) + 'Rep' + str(i) + '.pickle'
