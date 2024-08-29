@@ -15,11 +15,11 @@ To install PyMHSS, use `pip` or `python3 -m pip`:
 The repository is organised into three main folders:
 
 * **Simulation Experiments**: Provides scripts to reproduce figures and tables from both the main paper and supplementary material. For added convenience, script names follow the same sequence as figure and table references in the original text.
+> [!NOTE]
+> The scripts are ordered following the order of the figures/tables of the MH-SS paper on arxiv.
+
 * **Real-world Applications**: Houses datasets and scripts to reproduce results presented in the paper.
 * **PyMHSS**: A Python package that enables running all results mentioned in the paper.
-
-> [!NOTE]
-> The Python scripts are ordered following the order of the figures and tables of the MH-SS paper on arxiv.
 
 ## Simulation experiments
 
