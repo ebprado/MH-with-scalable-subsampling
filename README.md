@@ -18,6 +18,9 @@ The repository is organised into three main folders:
 * **Real-world Applications**: Houses datasets and scripts to reproduce results presented in the paper.
 * **PyMHSS**: A Python package that enables running all results mentioned in the paper.
 
+> [!NOTE]
+> The Python scripts are ordered following the order of the figures and tables of the MH-SS paper on arxiv.
+
 ## Simulation experiments
 
 * `01_Figure_1.py`: acceptance rates and ESS per second for SMH-1, Tuna and RWM. The results are based on synthetic datasets generated from a logistic regression model with $n = 31,622$ observations.
