@@ -19,7 +19,7 @@ The repository is organised into three main folders:
 * **PyMHSS**: A Python package that enables running all results mentioned in the paper.
 
 > [!NOTE]
-> The scripts are ordered following the order of the figures/tables of the MH-SS paper on arxiv.
+> In each folder, the scripts are ordered following the order of the figures/tables of the MH-SS paper on arxiv.
 
 ## Simulation experiments
 
