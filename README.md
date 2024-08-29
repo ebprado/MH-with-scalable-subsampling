@@ -89,7 +89,7 @@ The `PyMHSS` package implements several Markov Chain Monte Carlo (MCMC) algorith
 
 The main functions of `PyMHSS` can be found within the `main > PyMHSS > algorithms.py` file.
 
-### Implementation Strategies
+### Implementation strategies
 
 We implemented all algorithms using two primary strategies:
 
