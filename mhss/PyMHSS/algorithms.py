@@ -1048,3 +1048,270 @@ def MH_SS(y, x, V, x0, nburn, npost, model, implementation, control_variates = T
             'N': n,
             'd': d,
             'lambda': save_lambda/npost}
+
+def MH_SS_random_selection(y, x, V, x0, nburn, npost, model, implementation, control_variates = True, chi = 0, taylor_order=1, phi_function = 'min', kappa = 1.5, nthin = 1):
+
+    """ 
+    General description: Metropolis-Hastings with Scalable Subsampling algorithm. This implementation can also
+    be used to run the Tuna algorithm (Zhang et al, NeurIPS 2020) if control_variates = False and chi > 0.
+
+    Parameters
+    ----------
+    y : dependent/response univariate variable
+    x : an n x d design matrix 
+    V : covariance matrix of the proposal distribution for the random-walk proposal
+    x0: initial parameter values
+    nburn : number of MCMC iterations for the burn-in period
+    npost : number of MCMC iterations for the post-burn-in period
+    model : it can be 'logistic', 'probit' and 'poisson'
+    implementation: either 'loop' or 'vectorised'
+
+    control_variates: control_variates == False results in the Tuna algorithm. If control_variates == True, then the MH_SS algorithm is run
+    chi : Tuna additional hyperparameter. In MH-SS, chi = 0. In the Tuna algorithm, chi > 0
+    taylor_order: order of the control-variates. It's either 1 or 2 for MH-SS, zero otherwise (i.e., Tuna algorithm)
+    phi_function: If phi_function == 'min', then gamma = 0 and the expectation of the Poisson auxiliary variable is optimally designed. On the other hand, phi_function == 'max' denotes gamma = 1
+    kappa : scaling parameter of the random-walk proposal distribution
+    nthin : Every nthin draw is kept to be returned to the user
+    
+    Returns
+    -------
+    parameters : a matrix with posterior samples
+    acc_rate : overall acceptance probability of the algorithm (i.e., alpha1 * alpha2)
+    acc_rate_ratio1 : Stage 1 acceptance probability  (i.e., alpha1 only)
+    BoverN : Average batch size over the total number of observations
+    cpu_time : how long it took to run (in seconds)
+    meanSJD : mean squared jump distance
+    ESS : effective sample size
+    chi : Tuna additional hyperparameter
+    N : number of observations
+    d : number of parameters
+    lambda : chi should be set so that lambda < 1 following the Tuna paper.
+    """
+
+    n = len(y)
+    d = len(x0)
+    nmcmc = nburn + npost
+    store_size = int(npost/nthin)
+    save_parameters = np.zeros((store_size, d))
+    save_B = np.zeros((store_size, 1))
+    save_lambda = 0
+
+    acceptance_rate = 0
+    count_acc_rate_ratio1 = 0
+    sum_SJD = 0
+    subsample_idx_initial = range(n)
+    aux_idx = 0
+    
+    theta_hat = x0
+
+    control_variates = control_variates
+    taylor_order = taylor_order
+    model = model
+
+    U, c_i, log_target_i, sum_grad_at_theta_hat, sum_hess_at_theta_hat = define_target_and_bounds(x, y, theta_hat, model, control_variates, taylor_order)
+    
+    # Help faster sampling from MVN
+    cov_mat = (kappa / np.sqrt(d))**2 * V
+    cholesky_dec = np.linalg.cholesky(cov_mat)
+
+    C = np.sum(c_i)
+    weights = c_i/C
+    E_M = (kappa / np.sqrt(d)) * np.sqrt(np.trace(V)) # rough number based on E(||theta - theta'||_2) from TunaMH without CV.
+    n_samples = np.minimum(10000000, int(C* E_M**2 *nmcmc*1.5))
+    # sample_idx = np.random.choice(range(n), n_samples, p=weights)
+    sample_idx = np.random.choice(range(n), n_samples)
+
+    theta = multivariate_norm(theta_hat, cholesky_dec, d)
+
+    start_time = time.time()
+
+    for i in tqdm(range(nmcmc), desc='Running', ncols=75):
+
+        # Propose new candidate values for theta
+        theta_prime = multivariate_norm(theta, cholesky_dec, d)
+
+        # Calculate the bound, which is a function M and C
+        M = M_theta_theta_prime(theta, theta_prime, theta_hat, control_variates, taylor_order)
+
+        _lambda = chi * (C**2) * (M**2) # see the bottom of page 20
+        poisson_rate = _lambda + C*M
+        B = np.random.poisson(poisson_rate)
+
+        if B == 0:
+            if control_variates == True:
+                r = sum_grad_at_theta_hat @ (theta_prime - theta)
+                if taylor_order == 2:
+                    r = r + 0.5 * (theta_prime - theta_hat) @ sum_hess_at_theta_hat @ (theta_prime - theta_hat) - 0.5 * (theta - theta_hat) @ sum_hess_at_theta_hat @ (theta - theta_hat)
+            else:
+                r = 0 # accept theta_prime
+
+        # Perform a RWM step
+        elif poisson_rate >= n:
+            B = n
+            subsample_idx = subsample_idx_initial
+            U_theta = -log_target_i(theta, y, x)
+            U_theta_prime = -log_target_i(theta_prime, y, x)
+            r = np.sum(U_theta - U_theta_prime)
+        
+        else:
+            if control_variates == True:
+                log_ratio1 = sum_grad_at_theta_hat @ (theta_prime - theta)
+                if taylor_order == 2:
+                    log_ratio1 = log_ratio1 + 0.5 * (theta_prime - theta_hat) @ sum_hess_at_theta_hat @ (theta_prime - theta_hat) - 0.5 * (theta - theta_hat) @ sum_hess_at_theta_hat @ (theta - theta_hat)
+            else:
+                log_ratio1 = 0 # move on
+            # If the acceptance probability PART 1 is all right, then work away
+            if np.random.exponential() > -log_ratio1:
+                if i >= nburn:
+                    count_acc_rate_ratio1 = count_acc_rate_ratio1 + 1
+
+                # Reinitialise the vector of indices if we've got to the end of it
+                if aux_idx + B > n_samples:
+                    aux_idx = 0
+
+                # Loop through the vector of indices
+                subsample_idx = sample_idx[aux_idx:aux_idx+B]
+                c_i_subsample = c_i[subsample_idx]                
+                aux_idx = aux_idx + B + 1
+
+                U_theta = U(theta, subsample_idx)
+                U_theta_prime = U(theta_prime, subsample_idx)
+
+                # Calculate phi and phi_prime; see Equation 6 (page 20)
+                if phi_function == 'min':
+                    diff_U = U_theta_prime - U_theta
+                    phi = np.minimum(0, diff_U) + c_i_subsample * M
+                    phi_prime = phi - diff_U
+                    # phi_prime = np.minimum(0, -diff_U) + c_i_subsample * M
+
+                elif phi_function == 'max':
+                    diff_U = U_theta_prime - U_theta
+                    phi = np.maximum(0, diff_U)
+                    # phi_prime = phi - diff_U
+                    phi_prime = np.maximum(0, -diff_U)
+
+                else:
+                    phi = 0.5 * (U_theta + U_theta_prime) - U_theta + 0.5 * c_i_subsample * M
+                    phi_prime = 0.5 * (U_theta + U_theta_prime) - U_theta_prime + 0.5 * c_i_subsample * M
+
+                # Form minibatch; see the bottom of page 20
+                prob_add_to_I = (_lambda * c_i_subsample + C * phi) / (_lambda * c_i_subsample + C * c_i_subsample * M)
+                n_obs_bundled = len(prob_add_to_I)
+
+                I = np.where(np.random.uniform(0, 1, n_obs_bundled) < prob_add_to_I)[0]
+
+                # Metropolis-Hastings ratio; see Algorithm 4 on page 21
+                if implementation == 'vectorised':
+                    r = np.sum(np.log((_lambda*c_i_subsample[I] + C * phi_prime[I])/(_lambda*c_i_subsample[I] + C * phi[I])))
+                elif implementation == 'loop':
+                    r = 0
+                    for j in I:
+                        r = r + np.sum(np.log((_lambda*c_i_subsample[j] + C * phi_prime[j])/(_lambda*c_i_subsample[j] + C * phi[j])))
+
+            else:
+                r = -np.Inf # i.e., reject theta_prime
+
+        if np.random.exponential() > -r:
+            aux_theta_SJD = theta
+            theta = theta_prime
+            if i>= nburn:
+                acceptance_rate = acceptance_rate + 1
+                sum_SJD = sum_SJD + L2_norm_vector(aux_theta_SJD - theta_prime)**2
+                
+        if i >= nburn and ((i-nburn)%nthin == 0):
+            curr_idx = int((i-nburn)/nthin)
+            save_parameters[curr_idx, :] = theta
+            save_B[curr_idx, :] = B
+            save_lambda = save_lambda + _lambda
+    
+    cpu_time = time.time() - start_time
+        
+    EffectiveSampleSize = effective_sample_size(save_parameters)
+
+    return {'parameters': save_parameters,
+            'acc_rate': acceptance_rate/npost,
+            'acc_rate_ratio1': count_acc_rate_ratio1/npost,
+            'BoverN': save_B/n,
+            'cpu_time': cpu_time,
+            'meanSJD': sum_SJD/npost,
+            'ESS': EffectiveSampleSize,
+            'chi': chi,
+            'N': n,
+            'd': d,
+            'lambda': save_lambda/npost}
+
+from PyMHSS import *
+import numpy as np
+from typing import Union
+from jax import jit, vmap, lax
+import jax.numpy as jnp
+
+"""
+The k_0_fun and imq_KSD functions are from the SGMCMCJax package (see https://joss.theoj.org/papers/10.21105/joss.04113)
+"""
+Array = Union[np.ndarray, jnp.ndarray]
+
+@jit
+def k_0_fun(
+    parm1: Array,
+    parm2: Array,
+    gradlogp1: Array,
+    gradlogp2: Array,
+    c: float = 1.0,
+    beta: float = -0.5,
+) -> float:
+    """KSD kernel with the IMQ kernel and the 2 norm: http://proceedings.mlr.press/v70/gorham17a/gorham17a.pdf
+
+    Args:
+        parm1 (Array): sampled parameter 1
+        parm2 (Array): sampled parameter 2
+        gradlogp1 (Array): gradient of sampled parameter 1
+        gradlogp2 (Array): gradient of sampled parameter 2
+        c (float, optional): intercept parameter in the IMQ kernel. Defaults to 1.
+        beta (float, optional): exponent parameter in the IMQ kernel. Defaults to -0.5.
+
+    Returns:
+        float: value of kernel for the pair of samples
+    """
+    diff = parm1 - parm2
+    dim = parm1.shape[0]
+    base = c**2 + jnp.dot(diff, diff)
+    term1 = jnp.dot(gradlogp1, gradlogp2) * base**beta
+    term2 = -2 * beta * jnp.dot(gradlogp1, diff) * base ** (beta - 1)
+    term3 = 2 * beta * jnp.dot(gradlogp2, diff) * base ** (beta - 1)
+    term4 = -2 * dim * beta * (base ** (beta - 1))
+    term5 = -4 * beta * (beta - 1) * base ** (beta - 2) * jnp.sum(jnp.square(diff))
+    return term1 + term2 + term3 + term4 + term5
+
+
+_batch_k_0_fun_rows = jit(vmap(k_0_fun, in_axes=(None, 0, None, 0, None, None)))
+
+@jit
+def imq_KSD(samples: Array, grads: Array) -> Array:
+    """Kernel Stein Discrepancy with IMQ kernel
+
+    Args:
+        samples (Array): MCMC samples
+        grads (Array): gradients of the MCMC samples
+
+    Returns:
+        float: estimate of the KSD
+    """
+    c, beta = 1.0, -0.5
+    N = samples.shape[0]
+
+    # we use lax.scan rather than a nested vmap as the latter becomes very slow for high dimensional problems with lots of samples.
+    def body_ksd(le_sum, x):
+        my_sample, my_grad = x
+        le_sum += jnp.sum(
+            _batch_k_0_fun_rows(my_sample, samples, my_grad, grads, c, beta)
+        )
+        return le_sum, None
+
+    le_sum, _ = lax.scan(body_ksd, 0.0, (samples, grads))
+    return jnp.sqrt(le_sum) / N
+
+def calcula_ksd(post_samples, grad_log_target_i, x_train, y_train):
+    n_post_samples = post_samples.shape[0]
+    grad_mcmc_samples = np.array([np.sum(grad_log_target_i(post_samples[j, :], x_train, y_train), axis=0) for j in range(n_post_samples)])
+    return float(imq_KSD(post_samples, grad_mcmc_samples))
