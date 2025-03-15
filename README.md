@@ -18,6 +18,9 @@ The repository is organised into three main folders:
 * **Real-world Applications**: Houses datasets and scripts to reproduce results presented in the paper.
 * **PyMHSS**: A Python package that enables running all results mentioned in the paper.
 
+> [!NOTE]
+> In each folder, the scripts are named following the order of the figures/tables of the MH-SS paper on arxiv.
+
 ## Simulation experiments
 
 * `01_Figure_1.py`: acceptance rates and ESS per second for SMH-1, Tuna and RWM. The results are based on synthetic datasets generated from a logistic regression model with $n = 31,622$ observations.
@@ -89,7 +92,7 @@ The `PyMHSS` package implements several Markov Chain Monte Carlo (MCMC) algorith
 
 The main functions of `PyMHSS` can be found within the `main > PyMHSS > algorithms.py` file.
 
-### Implementation Strategies
+### Implementation strategies
 
 We implemented all algorithms using two primary strategies:
 
