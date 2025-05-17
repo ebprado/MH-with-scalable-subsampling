@@ -14,9 +14,6 @@ except ImportError:
 import pickle
 import time 
 import os
-from typing import Union
-from jax import jit, vmap, lax
-import jax.numpy as jnp
 
 def save_file(file, file_name):
     with open(file_name, 'wb') as f:
@@ -506,16 +503,6 @@ def D_2(omega, aux1 = 3**1.5):
     c_2 = np.sqrt(2 + 0.25*(omega)**2) - 0.5 * abs_omega
     return 1/(c_2 * aux1) * (2 + abs_omega * c_2)**1.5
 
-def get_grad_log_target_i(model):
-    if model =='logistic':
-        grad_log_target = logistic_grad_log_target_i
-    elif model == 'probit':
-        grad_log_target = probit_grad_log_target_i
-    elif model == 'poisson':
-        grad_log_target = poisson_grad_log_target_i
-
-    return grad_log_target
-
 def get_theta_hat_and_var_cov_matrix(model, x, y, x0=None, basic_lr=None, iter_max=100000):
 
     """ Find an estimate (theta hat) of the posterior mode via SGD and evaluate the Hessian at theta hat """
@@ -550,7 +537,7 @@ def get_theta_hat_and_var_cov_matrix(model, x, y, x0=None, basic_lr=None, iter_m
     
     return theta_hat, V
 
-def RWM(y, x, V, x0, model, nburn, npost, implementation, nthin=1, kappa = 2.4, calculate_ksd=False):
+def RWM(y, x, V, x0, model, nburn, npost, implementation, kappa = 2.4, nthin=1):
 
     """ 
     General description: random-walk Metropolis algorithm
@@ -583,7 +570,8 @@ def RWM(y, x, V, x0, model, nburn, npost, implementation, nthin=1, kappa = 2.4, 
     theta = x0
 
     nmcmc = nburn + npost
-    save_parameters = np.zeros((npost, d))
+    store_size = int(npost/nthin)
+    save_parameters = np.zeros((store_size, d))
     acceptance_rate = 0
     sum_SJD = 0
 
@@ -637,18 +625,11 @@ def RWM(y, x, V, x0, model, nburn, npost, implementation, nthin=1, kappa = 2.4, 
 
     EffectiveSampleSize = effective_sample_size(save_parameters)
 
-    if calculate_ksd:
-        grad_log_target_i = get_grad_log_target_i(model)
-        ksd = compute_ksd(save_parameters, grad_log_target_i, x, y)
-    else:
-        ksd = None
-
     return {'parameters': save_parameters,
             'acc_rate': acceptance_rate/npost,
             'cpu_time': cpu_time,
             'meanSJD': sum_SJD/npost,
             'ESS': EffectiveSampleSize,
-            'KSD': ksd,
             'N': n,
             'd': d}
 
@@ -699,7 +680,7 @@ def get_phi_theta_theta_prime(theta, theta_prime, theta_hat, bound, taylor_order
 
     return phi_theta_theta_prime
 
-def SMH(y, x, V, x0, nburn, npost, kappa, model, implementation, bound = 'orig', taylor_order = 1, control_variates = True, nthin = 1, calculate_ksd = False):
+def SMH(y, x, V, x0, nburn, npost, kappa, model, implementation, bound = 'orig', taylor_order = 1, control_variates = True, nthin = 1):
 
     """ 
     General description: Scalable Metropolish-Hastings algorithm (Cornish et al, ICML 2019)
@@ -869,12 +850,6 @@ def SMH(y, x, V, x0, nburn, npost, kappa, model, implementation, bound = 'orig',
     cpu_time = time.time() - start_time
 
     EffectiveSampleSize = effective_sample_size(store_samples)
-    
-    if calculate_ksd:
-        grad_log_target_i = get_grad_log_target_i(model)
-        ksd = compute_ksd(store_samples, grad_log_target_i, x, y)
-    else:
-        ksd = None
 
     return {'parameters': store_samples,
             'acc_rate': acceptance_rate/npost,
@@ -883,11 +858,10 @@ def SMH(y, x, V, x0, nburn, npost, kappa, model, implementation, bound = 'orig',
             'cpu_time': cpu_time,
             'meanSJD': sum_SJD/npost,
             'ESS': EffectiveSampleSize,
-            'KSD': ksd,
             'N': n,
             'd': d}
 
-def MH_SS(y, x, V, x0, nburn, npost, model, implementation, control_variates = True, chi = 0, taylor_order=1, phi_function = 'min', kappa = 1.5, nthin = 1, calculate_ksd=False):
+def MH_SS(y, x, V, x0, nburn, npost, model, implementation, control_variates = True, chi = 0, taylor_order=1, phi_function = 'min', kappa = 1.5, nthin = 1):
 
     """ 
     General description: Metropolis-Hastings with Scalable Subsampling algorithm. This implementation can also
@@ -1064,12 +1038,6 @@ def MH_SS(y, x, V, x0, nburn, npost, model, implementation, control_variates = T
     cpu_time = time.time() - start_time
         
     EffectiveSampleSize = effective_sample_size(save_parameters)
-    
-    if calculate_ksd:
-        grad_log_target_i = get_grad_log_target_i(model)
-        ksd = compute_ksd(save_parameters, grad_log_target_i, x, y)
-    else:
-        ksd = None
 
     return {'parameters': save_parameters,
             'acc_rate': acceptance_rate/npost,
@@ -1078,13 +1046,12 @@ def MH_SS(y, x, V, x0, nburn, npost, model, implementation, control_variates = T
             'cpu_time': cpu_time,
             'meanSJD': sum_SJD/npost,
             'ESS': EffectiveSampleSize,
-            'KSD': ksd,
             'chi': chi,
             'N': n,
             'd': d,
             'lambda': save_lambda/npost}
 
-def MH_SS_random_selection(y, x, V, x0, nburn, npost, model, implementation, control_variates = True, chi = 0, taylor_order=1, phi_function = 'min', kappa = 1.5, nthin = 1, calculate_ksd=False):
+def MH_SS_random_selection(y, x, V, x0, nburn, npost, model, implementation, control_variates = True, chi = 0, taylor_order=1, phi_function = 'min', kappa = 1.5, nthin = 1):
 
     """ 
     General description: Metropolis-Hastings with Scalable Subsampling algorithm. This implementation can also
@@ -1230,18 +1197,15 @@ def MH_SS_random_selection(y, x, V, x0, nburn, npost, model, implementation, con
                     phi_prime = 0.5 * (U_theta + U_theta_prime) - U_theta_prime + 0.5 * c_i_subsample * M
 
                 # Form minibatch; see the bottom of page 20
-                prob_add_to_I = (_lambda * c_i_subsample + C * phi) / (_lambda * c_i_subsample + C * c_i_subsample * M)
-                n_obs_bundled = len(prob_add_to_I)
+                # prob_add_to_I = (_lambda * c_i_subsample + C * phi) / (_lambda * c_i_subsample + C * c_i_subsample * M)
+                # n_obs_bundled = len(prob_add_to_I)
 
-                I = np.where(np.random.uniform(0, 1, n_obs_bundled) < prob_add_to_I)[0]
+                # I = np.where(np.random.uniform(0, 1, n_obs_bundled) < prob_add_to_I)[0]
 
                 # Metropolis-Hastings ratio; see Algorithm 4 on page 21
                 if implementation == 'vectorised':
-                    r = np.sum(np.log((_lambda*c_i_subsample[I] + C * phi_prime[I])/(_lambda*c_i_subsample[I] + C * phi[I])))
-                elif implementation == 'loop':
-                    r = 0
-                    for j in I:
-                        r = r + np.sum(np.log((_lambda*c_i_subsample[j] + C * phi_prime[j])/(_lambda*c_i_subsample[j] + C * phi[j])))
+                    r = np.sum(np.log((_lambda*c_i_subsample + C * phi_prime)/(_lambda*c_i_subsample + C * phi)))
+                    # r = np.sum(np.log((_lambda*c_i_subsample[I] + C * phi_prime[I])/(_lambda*c_i_subsample[I] + C * phi[I])))
 
             else:
                 r = -np.Inf # i.e., reject theta_prime
@@ -1263,12 +1227,6 @@ def MH_SS_random_selection(y, x, V, x0, nburn, npost, model, implementation, con
         
     EffectiveSampleSize = effective_sample_size(save_parameters)
 
-    if calculate_ksd:
-        grad_log_target_i = get_grad_log_target_i(model)
-        ksd = compute_ksd(save_parameters, grad_log_target_i, x, y)
-    else:
-        ksd = None
-
     return {'parameters': save_parameters,
             'acc_rate': acceptance_rate/npost,
             'acc_rate_ratio1': count_acc_rate_ratio1/npost,
@@ -1276,78 +1234,7 @@ def MH_SS_random_selection(y, x, V, x0, nburn, npost, model, implementation, con
             'cpu_time': cpu_time,
             'meanSJD': sum_SJD/npost,
             'ESS': EffectiveSampleSize,
-            'KSD': ksd,
             'chi': chi,
             'N': n,
             'd': d,
             'lambda': save_lambda/npost}
-
-"""
-The k_0_fun and imq_KSD functions are from the SGMCMCJax package (see https://joss.theoj.org/papers/10.21105/joss.04113)
-"""
-Array = Union[np.ndarray, jnp.ndarray]
-
-@jit
-def k_0_fun(
-    parm1: Array,
-    parm2: Array,
-    gradlogp1: Array,
-    gradlogp2: Array,
-    c: float = 1.0,
-    beta: float = -0.5,
-) -> float:
-    """KSD kernel with the IMQ kernel and the 2 norm: http://proceedings.mlr.press/v70/gorham17a/gorham17a.pdf
-
-    Args:
-        parm1 (Array): sampled parameter 1
-        parm2 (Array): sampled parameter 2
-        gradlogp1 (Array): gradient of sampled parameter 1
-        gradlogp2 (Array): gradient of sampled parameter 2
-        c (float, optional): intercept parameter in the IMQ kernel. Defaults to 1.
-        beta (float, optional): exponent parameter in the IMQ kernel. Defaults to -0.5.
-
-    Returns:
-        float: value of kernel for the pair of samples
-    """
-    diff = parm1 - parm2
-    dim = parm1.shape[0]
-    base = c**2 + jnp.dot(diff, diff)
-    term1 = jnp.dot(gradlogp1, gradlogp2) * base**beta
-    term2 = -2 * beta * jnp.dot(gradlogp1, diff) * base ** (beta - 1)
-    term3 = 2 * beta * jnp.dot(gradlogp2, diff) * base ** (beta - 1)
-    term4 = -2 * dim * beta * (base ** (beta - 1))
-    term5 = -4 * beta * (beta - 1) * base ** (beta - 2) * jnp.sum(jnp.square(diff))
-    return term1 + term2 + term3 + term4 + term5
-
-
-_batch_k_0_fun_rows = jit(vmap(k_0_fun, in_axes=(None, 0, None, 0, None, None)))
-
-@jit
-def imq_KSD(samples: Array, grads: Array) -> Array:
-    """Kernel Stein Discrepancy with IMQ kernel
-
-    Args:
-        samples (Array): MCMC samples
-        grads (Array): gradients of the MCMC samples
-
-    Returns:
-        float: estimate of the KSD
-    """
-    c, beta = 1.0, -0.5
-    N = samples.shape[0]
-
-    # we use lax.scan rather than a nested vmap as the latter becomes very slow for high dimensional problems with lots of samples.
-    def body_ksd(le_sum, x):
-        my_sample, my_grad = x
-        le_sum += jnp.sum(
-            _batch_k_0_fun_rows(my_sample, samples, my_grad, grads, c, beta)
-        )
-        return le_sum, None
-
-    le_sum, _ = lax.scan(body_ksd, 0.0, (samples, grads))
-    return jnp.sqrt(le_sum) / N
-
-def compute_ksd(post_samples, grad_log_target_i, x_train, y_train):
-    n_post_samples = post_samples.shape[0]
-    grad_mcmc_samples = np.array([np.sum(grad_log_target_i(post_samples[j, :], x_train, y_train), axis=0) for j in range(n_post_samples)])
-    return float(imq_KSD(post_samples, grad_mcmc_samples))

@@ -7,9 +7,9 @@ requires = ["setuptools == 68.2.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "PyMHSS"
+name = "pymhss"
 readme = "README.md"
-version = "0.0.5"
+version = "0.0.7"
 dependencies = [
     "tensorflow",
     "tqdm",
