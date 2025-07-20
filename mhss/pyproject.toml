@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pymhss"
 readme = "README.md"
-version = "0.0.7"
+version = "0.0.9"
 dependencies = [
     "tensorflow",
     "tqdm",
