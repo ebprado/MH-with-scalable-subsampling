@@ -1447,6 +1447,7 @@ def MH_SS_without_DA(y, x, V, x0, nburn, npost, model, implementation, control_v
                     r = r + 0.5 * (theta_prime - theta_hat) @ sum_hess_at_theta_hat @ (theta_prime - theta_hat) - 0.5 * (theta - theta_hat) @ sum_hess_at_theta_hat @ (theta - theta_hat)
             else:
                 r = 0 # accept theta_prime
+                log_ratio1 = 0
 
         # Perform a RWM step
         elif poisson_rate >= n:
@@ -1464,53 +1465,58 @@ def MH_SS_without_DA(y, x, V, x0, nburn, npost, model, implementation, control_v
             else:
                 log_ratio1 = 0 # move on
             # If the acceptance probability PART 1 is all right, then work away
-        # if np.random.exponential() > -log_ratio1:
-            if i >= nburn:
-                count_acc_rate_ratio1 = count_acc_rate_ratio1 + 1
+            if log_ratio1 is not None:
+            # if np.random.exponential() > -log_ratio1:
+                if i >= nburn:
+                    count_acc_rate_ratio1 = count_acc_rate_ratio1 + 1
 
-            # Reinitialise the vector of indices if we've got to the end of it
-            if aux_idx + B > n_samples:
-                aux_idx = 0
+                # Reinitialise the vector of indices if we've got to the end of it
+                if aux_idx + B > n_samples:
+                    aux_idx = 0
 
-            # Loop through the vector of indices
-            subsample_idx = sample_idx[aux_idx:aux_idx+B]
-            c_i_subsample = c_i[subsample_idx]                
-            aux_idx = aux_idx + B + 1
+                # Loop through the vector of indices
+                subsample_idx = sample_idx[aux_idx:aux_idx+B]
+                c_i_subsample = c_i[subsample_idx]                
+                aux_idx = aux_idx + B + 1
 
-            U_theta = U(theta, subsample_idx)
-            U_theta_prime = U(theta_prime, subsample_idx)
+                U_theta = U(theta, subsample_idx)
+                U_theta_prime = U(theta_prime, subsample_idx)
 
-            # Calculate phi and phi_prime; see Equation 6 (page 20)
-            if phi_function == 'min':
-                diff_U = U_theta_prime - U_theta
-                phi = np.minimum(0, diff_U) + c_i_subsample * M
-                phi_prime = phi - diff_U
-                # phi_prime = np.minimum(0, -diff_U) + c_i_subsample * M
+                # Calculate phi and phi_prime; see Equation 6 (page 20)
+                if phi_function == 'min':
+                    diff_U = U_theta_prime - U_theta
+                    phi = np.minimum(0, diff_U) + c_i_subsample * M
+                    phi_prime = phi - diff_U
+                    # phi_prime = np.minimum(0, -diff_U) + c_i_subsample * M
 
-            elif phi_function == 'max':
-                diff_U = U_theta_prime - U_theta
-                phi = np.maximum(0, diff_U)
-                # phi_prime = phi - diff_U
-                phi_prime = np.maximum(0, -diff_U)
+                elif phi_function == 'max':
+                    diff_U = U_theta_prime - U_theta
+                    phi = np.maximum(0, diff_U)
+                    # phi_prime = phi - diff_U
+                    phi_prime = np.maximum(0, -diff_U)
+
+                else:
+                    phi = 0.5 * (U_theta + U_theta_prime) - U_theta + 0.5 * c_i_subsample * M
+                    phi_prime = 0.5 * (U_theta + U_theta_prime) - U_theta_prime + 0.5 * c_i_subsample * M
+
+                # Form minibatch; see the bottom of page 20
+                prob_add_to_I = (_lambda * c_i_subsample + C * phi) / (_lambda * c_i_subsample + C * c_i_subsample * M)
+                n_obs_bundled = len(prob_add_to_I)
+
+                I = np.where(np.random.uniform(0, 1, n_obs_bundled) < prob_add_to_I)[0]
+
+                # Metropolis-Hastings ratio; see Algorithm 4 on page 21
+                if implementation == 'vectorised':
+                    r = np.sum(np.log((_lambda*c_i_subsample[I] + C * phi_prime[I])/(_lambda*c_i_subsample[I] + C * phi[I])))
+                elif implementation == 'loop':
+                    r = 0
+                    for j in I:
+                        r = r + np.sum(np.log((_lambda*c_i_subsample[j] + C * phi_prime[j])/(_lambda*c_i_subsample[j] + C * phi[j])))
 
             else:
-                phi = 0.5 * (U_theta + U_theta_prime) - U_theta + 0.5 * c_i_subsample * M
-                phi_prime = 0.5 * (U_theta + U_theta_prime) - U_theta_prime + 0.5 * c_i_subsample * M
+                r = -np.Inf # i.e., reject theta_prime
 
-            # Form minibatch; see the bottom of page 20
-            prob_add_to_I = (_lambda * c_i_subsample + C * phi) / (_lambda * c_i_subsample + C * c_i_subsample * M)
-            n_obs_bundled = len(prob_add_to_I)
-
-            I = np.where(np.random.uniform(0, 1, n_obs_bundled) < prob_add_to_I)[0]
-
-            # Metropolis-Hastings ratio; see Algorithm 4 on page 21
-            if implementation == 'vectorised':
-                r = log_ratio1 + np.sum(np.log((_lambda*c_i_subsample[I] + C * phi_prime[I])/(_lambda*c_i_subsample[I] + C * phi[I])))
-
-            # else:
-            #     r = -np.Inf # i.e., reject theta_prime
-
-        if np.random.exponential() > -r:
+        if np.random.exponential() > -(r + log_ratio1):
             aux_theta_SJD = theta
             theta = theta_prime
             if i>= nburn:
