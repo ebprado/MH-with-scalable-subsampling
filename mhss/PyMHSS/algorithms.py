@@ -7,7 +7,6 @@ try:
     import scipy.stats as scs
     import scipy.special as sc
     import tensorflow as tf
-    
 except ImportError:
     raise ImportError("Please make sure numpy, pandas, tqdm, statsmodels, scipy and tensorflow are ALL installed!")
 
@@ -46,6 +45,8 @@ def simulate_data(N, d, model, std_theta = 1):
         data = simulate_probit_regression(N, d, std_theta)
     elif model == 'poisson':
         data = simulate_poisson_regression(N, d, std_theta)
+    elif model == 'mixture':
+        data = simulate_mixture(N, d)
     return data
 
 def multivariate_norm(mean, cholesky_dec, d):
@@ -54,6 +55,31 @@ def multivariate_norm(mean, cholesky_dec, d):
 
     z = np.random.normal(0, 1, d)
     return mean + cholesky_dec @ z
+
+def simulate_mixture(N, d):
+
+    """
+    Simulate synthetic data from a logistic model.
+    
+    Parameters
+    ----------
+
+    N : number of observations
+    d : number of parameters in the linear predictor
+    """
+    delta = 1000/N
+    x = np.random.normal(0, 1, N * d) # simulate covariates  
+    x = np.array(x).reshape(N, d)
+    x[:, 0] = np.repeat(1, N)
+    theta = np.array([N**(-0.2)])  
+    lin_pred = np.asarray(x @theta)
+    w = np.random.uniform(0, 1, n) <= 0.5 + delta
+    y = w * lin_pred + (1 - w)*(-lin_pred) + np.random.normal(0, 1, n)
+    return {
+        'y': y,
+        'x': x,
+        'theta': theta,
+    }
 
 def simulate_logistic_regression(N, d, std_theta):
 
@@ -164,6 +190,58 @@ def L2_norm_vector(x):
 def L2_norm_matrix(x):
     """ Calculate the L1-norm of a vector """
     return np.linalg.norm(x,2,1)
+
+def mixture_model_log_target_i(beta, y, x, delta=10**(-3)):
+    """ Log-likelihood of a mixture model """
+    log_lik = np.log((0.5 + delta) * scs.norm.pdf(y + x @ beta) + (0.5 - delta) * scs.norm.pdf(y - x @ beta))
+    return log_lik
+
+def mixture_model_grad_log_target_i(beta, x, y, delta=10**(-3)):
+    """ Gradient of the log-likelihood of a mixture model """
+    a = 0.5 + delta
+    b = 0.5 - delta
+    t = x @ beta              
+    u = y + t
+    v = y - t
+    phi_u = scs.norm.pdf(u)
+    phi_v = scs.norm.pdf(v)
+    
+    D = a * phi_u + b * phi_v
+    num = b * v * phi_v - a * u * phi_u
+    weights = num / D         
+    
+    # grad = x.T @ weights      
+    grad = x * weights[:, None]      
+    return grad
+
+def mixture_model_hessian_log_target_i(beta, x, y, delta=10**(-3)):
+    """
+    Hessian of the log-likelihood of a mixture model: 
+        log_lik = sum log((0.5+δ) φ(y+xβ) + (0.5-δ) φ(y-xβ))
+    """
+    nrow = len(y)
+    a = 0.5 + delta
+    b = 0.5 - delta
+    t = x @ beta
+    u = y + t
+    v = y - t
+    
+    phi_u = scs.norm.pdf(u)
+    phi_v = scs.norm.pdf(v)
+    D = a * phi_u + b * phi_v
+    
+    # numerator for gradient
+    num = b * v * phi_v - a * u * phi_u
+    
+    # derivative terms
+    num_prime = b * phi_v * (v**2 - 1) + a * phi_u * (u**2 - 1)
+    D_prime = -a * u * phi_u + b * v * phi_v
+    
+    # scalar coefficients for Hessian
+    coeffs = (num_prime * D - num * D_prime) / (D**2)   # shape (n,)
+    
+    hessian_log_lik = -np.asarray([ coeffs[i] * x[i, None].T @ x[i, None] for i in range(nrow) ])
+    return hessian_log_lik, -coeffs
 
 def logistic_log_target_i(beta, y, x):
     """ Log-likelihood of a logistic regression model """
@@ -401,6 +479,10 @@ def define_target_and_bounds(x, y, theta_hat, model, control_variates, taylor_or
         log_target_i = poisson_log_target_i
         grad_log_target_i = poisson_grad_log_target_i
         hessian_log_target_i = poisson_hessian_log_target_i
+    elif model == 'mixture':
+        log_target_i = mixture_model_log_target_i
+        grad_log_target_i = mixture_model_grad_log_target_i
+        hessian_log_target_i = mixture_model_hessian_log_target_i
 
     if control_variates == True:
         grad_at_theta_hat = grad_log_target_i(theta_hat, x, y)
@@ -422,6 +504,9 @@ def define_target_and_bounds(x, y, theta_hat, model, control_variates, taylor_or
                 c_i = Ly * norm_x
             if model == 'poisson':
                 Ly = 0.25 + 0.168*y
+                c_i = Ly * norm_x
+            if model == 'mixture':
+                Ly = np.maximum(1, y**2 - 1)
                 c_i = Ly * norm_x
 
         if taylor_order == 2:
@@ -513,6 +598,8 @@ def get_grad_log_target_i(model):
         grad_log_target = probit_grad_log_target_i
     elif model == 'poisson':
         grad_log_target = poisson_grad_log_target_i
+    elif model == 'mixture':
+        grad_log_target = mixture_model_grad_log_target_i
 
     return grad_log_target
 
@@ -526,6 +613,8 @@ def get_theta_hat_and_var_cov_matrix(model, x, y, x0=None, basic_lr=None, iter_m
         grad_log_target = probit_grad_log_target_i
     elif model == 'poisson':
         grad_log_target = poisson_grad_log_target_i
+    elif model == 'mixture':
+        grad_log_target = mixture_model_grad_log_target_i
                 
     # theta_hat = gd(grad_log_target, x=x, y=y, d=d, k=N)
     theta_hat = sgd_tf(grad_log_target, x=x, y=y,x0=x0, basic_lr=basic_lr, iter_max=iter_max).numpy()
@@ -547,7 +636,12 @@ def get_theta_hat_and_var_cov_matrix(model, x, y, x0=None, basic_lr=None, iter_m
         exp_eta = np.exp(eta)
         aux = ((exp_eta / (1 + exp_eta)**2) * (y * (exp_eta / np.log(1 + exp_eta)**2 - 1/np.log(1 + exp_eta)) + 1))[:, None]
         V = np.linalg.inv(x.T @ (x * aux))
-    
+
+    elif model == 'mixture':
+        hess_at_theta_hat, aux = mixture_model_hessian_log_target_i(theta_hat, x, y)
+        aux = -aux[:, None]
+        V = np.linalg.inv(x.T @ (x * aux))
+
     return theta_hat, V
 
 def RWM(y, x, V, x0, model, nburn, npost, implementation, nthin=1, kappa = 2.4, calculate_ksd=False):
@@ -599,7 +693,9 @@ def RWM(y, x, V, x0, model, nburn, npost, implementation, nthin=1, kappa = 2.4, 
         log_target_i = probit_log_target_i
     elif model == 'poisson':
         log_target_i = poisson_log_target_i
-    
+    elif model == 'mixture':
+        log_target_i = mixture_model_log_target_i
+
     U = lambda theta: -log_target_i(theta, y, x)
     U_j = lambda theta, idx: -log_target_i(theta, y[idx, True], x[idx, :])
 
@@ -1047,7 +1143,7 @@ def MH_SS(y, x, V, x0, nburn, npost, model, implementation, control_variates = T
                         r = r + np.sum(np.log((_lambda*c_i_subsample[j] + C * phi_prime[j])/(_lambda*c_i_subsample[j] + C * phi[j])))
 
             else:
-                r = -np.Inf # i.e., reject theta_prime
+                r = -np.inf # i.e., reject theta_prime
 
         if np.random.exponential() > -r:
             aux_theta_SJD = theta
@@ -1245,7 +1341,7 @@ def MH_SS_random_selection(y, x, V, x0, nburn, npost, model, implementation, con
                         r = r + np.sum(np.log((_lambda*c_i_subsample[j] + C * phi_prime[j])/(_lambda*c_i_subsample[j] + C * phi[j])))
 
             else:
-                r = -np.Inf # i.e., reject theta_prime
+                r = -np.inf # i.e., reject theta_prime
 
         if np.random.exponential() > -r:
             aux_theta_SJD = theta
@@ -1456,6 +1552,7 @@ def MH_SS_without_DA(y, x, V, x0, nburn, npost, model, implementation, control_v
             U_theta = -log_target_i(theta, y, x)
             U_theta_prime = -log_target_i(theta_prime, y, x)
             r = np.sum(U_theta - U_theta_prime)
+            log_ratio1 = 0
         
         else:
             if control_variates == True:
@@ -1514,7 +1611,7 @@ def MH_SS_without_DA(y, x, V, x0, nburn, npost, model, implementation, control_v
                         r = r + np.sum(np.log((_lambda*c_i_subsample[j] + C * phi_prime[j])/(_lambda*c_i_subsample[j] + C * phi[j])))
 
             else:
-                r = -np.Inf # i.e., reject theta_prime
+                r = -np.inf # i.e., reject theta_prime
 
         if np.random.exponential() > -(r + log_ratio1):
             aux_theta_SJD = theta
@@ -1551,3 +1648,270 @@ def MH_SS_without_DA(y, x, V, x0, nburn, npost, model, implementation, control_v
             'N': n,
             'd': d,
             'lambda': save_lambda/npost}
+
+# def MH_SS_multimodal(y, x, V, x0, nburn, npost, model, implementation, control_variates = True, chi = 0, taylor_order=1, phi_function = 'min', kappa = 1.5, nthin = 1, calculate_ksd=False):
+
+#     """ 
+#     General description: Metropolis-Hastings with Scalable Subsampling algorithm. This implementation can also
+#     be used to run the Tuna algorithm (Zhang et al, NeurIPS 2020) if control_variates = False and chi > 0.
+
+#     Parameters
+#     ----------
+#     y : dependent/response univariate variable
+#     x : an n x d design matrix 
+#     V : covariance matrix of the proposal distribution for the random-walk proposal
+#     x0: initial parameter values
+#     nburn : number of MCMC iterations for the burn-in period
+#     npost : number of MCMC iterations for the post-burn-in period
+#     model : it can be 'logistic', 'probit' and 'poisson'
+#     implementation: either 'loop' or 'vectorised'
+
+#     control_variates: control_variates == False results in the Tuna algorithm. If control_variates == True, then the MH_SS algorithm is run
+#     chi : Tuna additional hyperparameter. In MH-SS, chi = 0. In the Tuna algorithm, chi > 0
+#     taylor_order: order of the control-variates. It's either 1 or 2 for MH-SS, zero otherwise (i.e., Tuna algorithm)
+#     phi_function: If phi_function == 'min', then gamma = 0 and the expectation of the Poisson auxiliary variable is optimally designed. On the other hand, phi_function == 'max' denotes gamma = 1
+#     kappa : scaling parameter of the random-walk proposal distribution
+#     nthin : Every nthin draw is kept to be returned to the user
+    
+#     Returns
+#     -------
+#     parameters : a matrix with posterior samples
+#     acc_rate : overall acceptance probability of the algorithm (i.e., alpha1 * alpha2)
+#     acc_rate_ratio1 : Stage 1 acceptance probability  (i.e., alpha1 only)
+#     BoverN : Average batch size over the total number of observations
+#     cpu_time : how long it took to run (in seconds)
+#     meanSJD : mean squared jump distance
+#     ESS : effective sample size
+#     chi : Tuna additional hyperparameter
+#     N : number of observations
+#     d : number of parameters
+#     lambda : chi should be set so that lambda < 1 following the Tuna paper.
+#     """
+#     aux_theta_hat = list(x0.values())
+#     n = len(y)
+#     d = len(aux_theta_hat[0])
+#     nmcmc = nburn + npost
+#     store_size = int(npost/nthin)
+#     save_parameters = np.zeros((store_size, d))
+#     save_B = np.zeros((store_size, 1))
+#     save_lambda = 0
+
+#     acceptance_rate = 0
+#     count_acc_rate_ratio1 = 0
+#     sum_SJD = 0
+#     subsample_idx_initial = range(n)
+#     aux_idx = 0
+    
+#     theta_hat = aux_theta_hat
+
+#     control_variates = control_variates
+#     taylor_order = taylor_order
+#     model = model
+
+#     # U, c_i, log_target_i, sum_grad_at_theta_hat, sum_hess_at_theta_hat = define_target_and_bounds(x, y, theta_hat, model, control_variates, taylor_order)
+    
+#     # Call define_target_and_bounds for each element of theta_hat (list of numpy arrays)
+#     results = [define_target_and_bounds(x, y, th, model, control_variates, taylor_order) for th in theta_hat]
+
+#     # Unpack results for each mode (assuming two modes for multimodal case)
+#     U_list, c_i_list, log_target_i_list, sum_grad_at_theta_hat_list, sum_hess_at_theta_hat_list = zip(*results)
+
+#     # Use the first mode's outputs for the first iteration
+#     U, c_i, log_target_i, sum_grad_at_theta_hat, sum_hess_at_theta_hat = U_list[0], c_i_list[0], log_target_i_list[0], sum_grad_at_theta_hat_list[0], sum_hess_at_theta_hat_list[0]
+
+#     # Help faster sampling from MVN
+#     cov_mat = (kappa / np.sqrt(d))**2 * V
+#     cholesky_dec = np.linalg.cholesky(cov_mat)
+
+#     C = np.sum(c_i)
+#     weights = c_i/C
+#     E_M = (kappa / np.sqrt(d)) * np.sqrt(np.trace(V)) # rough number based on E(||theta - theta'||_2) from TunaMH without CV.
+#     n_samples = np.minimum(10000000, int(C* E_M**2 *nmcmc*1.5))
+#     sample_idx = np.random.choice(range(n), n_samples, p=weights)
+
+#     theta = multivariate_norm(aux_theta_hat[0], cholesky_dec, d)
+
+#     start_time = time.time()
+
+#     for i in tqdm(range(nmcmc), desc='Running', ncols=75):
+
+#         # Propose new candidate values for theta
+#         theta_prime = multivariate_norm(theta, cholesky_dec, d)
+
+#         # Choose the closest theta_hat to (theta + theta')/2
+#         aux_k_star = [L2_norm_vector((theta + theta_prime)/2 - th) for th in aux_theta_hat]
+#         k_star = np.argmin(aux_k_star)
+#         theta_hat = aux_theta_hat[k_star]
+
+#         # Use the corresponding precomputed values based on theta_hat_k_star
+#         c_i = c_i_list[k_star]
+#         sum_grad_at_theta_hat = sum_grad_at_theta_hat_list[k_star]
+#         sum_hess_at_theta_hat = sum_hess_at_theta_hat_list[k_star]
+#         U = U_list[k_star]
+#         log_target_i = log_target_i_list[k_star]
+
+#         # Calculate the bound, which is a function M and C
+#         M = M_theta_theta_prime(theta, theta_prime, theta_hat, control_variates, taylor_order)
+
+#         _lambda = chi * (C**2) * (M**2) # see the bottom of page 20
+#         poisson_rate = _lambda + C*M
+#         B = np.random.poisson(poisson_rate)
+
+#         if B == 0:
+#             if control_variates == True:
+#                 r = sum_grad_at_theta_hat @ (theta_prime - theta)
+#                 if taylor_order == 2:
+#                     r = r + 0.5 * (theta_prime - theta_hat) @ sum_hess_at_theta_hat @ (theta_prime - theta_hat) - 0.5 * (theta - theta_hat) @ sum_hess_at_theta_hat @ (theta - theta_hat)
+#             else:
+#                 r = 0 # accept theta_prime
+
+#         # Perform a RWM step
+#         elif poisson_rate >= n:
+#             B = n
+#             subsample_idx = subsample_idx_initial
+#             U_theta = -log_target_i(theta, y, x)
+#             U_theta_prime = -log_target_i(theta_prime, y, x)
+#             r = np.sum(U_theta - U_theta_prime)
+        
+#         else:
+#             if control_variates == True:
+#                 log_ratio1 = sum_grad_at_theta_hat @ (theta_prime - theta)
+#                 if taylor_order == 2:
+#                     log_ratio1 = log_ratio1 + 0.5 * (theta_prime - theta_hat) @ sum_hess_at_theta_hat @ (theta_prime - theta_hat) - 0.5 * (theta - theta_hat) @ sum_hess_at_theta_hat @ (theta - theta_hat)
+#             else:
+#                 log_ratio1 = 0 # move on
+#             # If the acceptance probability PART 1 is all right, then work away
+#             if np.random.exponential() > -log_ratio1:
+#                 if i >= nburn:
+#                     count_acc_rate_ratio1 = count_acc_rate_ratio1 + 1
+
+#                 # Reinitialise the vector of indices if we've got to the end of it
+#                 if aux_idx + B > n_samples:
+#                     aux_idx = 0
+
+#                 # Loop through the vector of indices
+#                 subsample_idx = sample_idx[aux_idx:aux_idx+B]
+#                 c_i_subsample = c_i[subsample_idx]                
+#                 aux_idx = aux_idx + B + 1
+
+#                 U_theta = U(theta, subsample_idx)
+#                 U_theta_prime = U(theta_prime, subsample_idx)
+
+#                 # Calculate phi and phi_prime; see Equation 6 (page 20)
+#                 if phi_function == 'min':
+#                     diff_U = U_theta_prime - U_theta
+#                     phi = np.minimum(0, diff_U) + c_i_subsample * M
+#                     phi_prime = phi - diff_U
+#                     # phi_prime = np.minimum(0, -diff_U) + c_i_subsample * M
+
+#                 elif phi_function == 'max':
+#                     diff_U = U_theta_prime - U_theta
+#                     phi = np.maximum(0, diff_U)
+#                     # phi_prime = phi - diff_U
+#                     phi_prime = np.maximum(0, -diff_U)
+
+#                 else:
+#                     phi = 0.5 * (U_theta + U_theta_prime) - U_theta + 0.5 * c_i_subsample * M
+#                     phi_prime = 0.5 * (U_theta + U_theta_prime) - U_theta_prime + 0.5 * c_i_subsample * M
+
+#                 # Form minibatch; see the bottom of page 20
+#                 prob_add_to_I = (_lambda * c_i_subsample + C * phi) / (_lambda * c_i_subsample + C * c_i_subsample * M)
+#                 n_obs_bundled = len(prob_add_to_I)
+
+#                 I = np.where(np.random.uniform(0, 1, n_obs_bundled) < prob_add_to_I)[0]
+
+#                 # Metropolis-Hastings ratio; see Algorithm 4 on page 21
+#                 if implementation == 'vectorised':
+#                     r = np.sum(np.log((_lambda*c_i_subsample[I] + C * phi_prime[I])/(_lambda*c_i_subsample[I] + C * phi[I])))
+#                 elif implementation == 'loop':
+#                     r = 0
+#                     for j in I:
+#                         r = r + np.sum(np.log((_lambda*c_i_subsample[j] + C * phi_prime[j])/(_lambda*c_i_subsample[j] + C * phi[j])))
+
+#             else:
+#                 r = -np.inf # i.e., reject theta_prime
+
+#         if np.random.exponential() > -r:
+#             aux_theta_SJD = theta
+#             theta = theta_prime
+#             if i>= nburn:
+#                 acceptance_rate = acceptance_rate + 1
+#                 sum_SJD = sum_SJD + L2_norm_vector(aux_theta_SJD - theta_prime)**2
+                
+#         if i >= nburn and ((i-nburn)%nthin == 0):
+#             curr_idx = int((i-nburn)/nthin)
+#             save_parameters[curr_idx, :] = theta
+#             save_B[curr_idx, :] = B
+#             save_lambda = save_lambda + _lambda
+    
+#     cpu_time = time.time() - start_time
+        
+#     EffectiveSampleSize = effective_sample_size(save_parameters)
+    
+#     if calculate_ksd:
+#         grad_log_target_i = get_grad_log_target_i(model)
+#         ksd = compute_ksd(save_parameters, grad_log_target_i, x, y)
+#     else:
+#         ksd = None
+
+#     return {'parameters': save_parameters,
+#             'acc_rate': acceptance_rate/npost,
+#             'acc_rate_ratio1': count_acc_rate_ratio1/npost,
+#             'BoverN': save_B/n,
+#             'cpu_time': cpu_time,
+#             'meanSJD': sum_SJD/npost,
+#             'ESS': EffectiveSampleSize,
+#             'KSD': ksd,
+#             'chi': chi,
+#             'N': n,
+#             'd': d,
+#             'lambda': save_lambda/npost}
+
+# # beta = np.array([0.063])
+# n = 10**6
+# delta=1000/n
+# data = simulate_mixture(n, d=1)
+# y = data['y']
+# x = data['x']
+# beta = data['theta']
+# d = len(beta)
+
+# import numpy as np
+# import matplotlib.pyplot as plt
+
+# # Parameters
+
+# # Simulate ys (assuming ys is y from above)
+# ys = y
+# # Generate beta1s and compute log-likelihoods
+# beta1s = np.linspace(-1.5 * beta, 1.5 * beta, 200)
+# lls = np.zeros_like(beta1s)
+
+# # Vectorized computation for speed
+# for i in range(len(beta1s)):
+#     beta1 = beta1s[i]
+#     lls[i] = np.sum(np.log((0.5 + delta) * scs.norm.pdf(ys + beta1, scale=1) +
+#                            (0.5 - delta) * scs.norm.pdf(ys - beta1, scale=1)))
+
+# # Plot
+# plt.plot(beta1s, lls, label="log pi(beta1,0,...,0)")
+# plt.xlabel("beta1")
+# plt.ylabel("log pi(beta1,0,...,0)")
+# plt.axvline(x=beta, color="red", label="mu")
+# plt.legend()
+# plt.show()
+
+# theta_hat = {'mode1': beta, 'mode2': -beta}
+
+# hess_at_theta_hat, aux = mixture_model_hessian_log_target_i(beta, x, y)
+
+# V = np.linalg.inv(x.T @ (x * aux[:, None]))
+
+# teste = MH_SS_multimodal(y, x, V=V, x0=theta_hat, kappa=1.5, nburn=0, nthin=1, npost=100000, model='mixture', implementation='vectorised', control_variates = True, chi = 0, taylor_order=1)
+# import matplotlib.pyplot as plt    
+
+# plt.plot(teste['parameters'])
+# teste['acc_rate']
+# teste['BoverN'].mean()
+# teste_rwm = RWM(y, x, V=V, x0=theta_hat['mode1'], nburn=0, npost=1000, model='mixture', implementation='vectorised')
+# plt.plot(teste_rwm['parameters'])
