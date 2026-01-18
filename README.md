@@ -27,17 +27,18 @@ The repository is organised into three main folders:
 
 * `02_Figure_2.py`: acceptance rates of the proposed method with first-order control variates. For each combination of $\gamma$, $n$ and $d$, $10$ synthetic datasets are generated from a logistic regression model.
 
-* `03_aux_generate_results.py`: generates the simulation results for Figures 3 and 4.
+* `03_aux_generate_results.py`: generates the simulation results for Figures 3, 4, 5 and 8 based on 10 monte carlo replicates.
 
-* `03_Figures_3_and_4.py`: optimal scaling for the MH-SS algorithms and acceptance rates, where $\alpha = \alpha_1 \times \alpha_2$, based on a logistic regression target in dimension $d=100$ with $n=30,000$ observations, and with covariates and true coefficients simulated as described in Section 5 of the paper. The efficiency metric (MSJD/E(B)) is plotted as a function of the scaling parameter ($\lambda$) and the empirical acceptance rate. 
+* `03_Figures_3_4_5_8.py`: ESS per second, ESS divided by E(B), average batch size for MH-SS, SMH and RWM for the logistic regression model. For RWM, the average batch size is $n$. In all figures, both axes are presented in the logarithm base 10. 
 
-* `04_aux_generate_results.py`: generates the simulation results for Figures 5, 6, 7, 8 and 9.
-
-* `04_Figures_5_6_7_8_9.py`: ESS per second, ESS divided by E(B), average batch size for MH-SS, SMH and RWM for the logistic regression model. For RWM, the average batch size is $n$. In all figures, both axes are presented in the logarithm base 10.
-
-* `05_Table_1.py`: acceptance rate, average batch size, ESS per second and ESS/E(B) for the Poisson regression model applied to synthetic data in $d=30$.
+* `04_APPENDIX_Table_3.py`: acceptance rate, average batch size, ESS per second and ESS/E(B) for the Poisson regression model applied to synthetic data in $d=30$.
   
-* `06_Figure_10.py`: Acceptance rates and mean squared jumping distance (MSJD) over E(B) based on a simulation experiment with a logistic regression model with dimension $d = 100$ and $n=100,000$.
+* `05_APPENDIX_Figure_10.py`: Acceptance rates and mean squared jumping distance (MSJD) over E(B) based on a simulation experiment with a logistic regression model with dimension $d = 100$ and $n=100,000$.
+
+* `06_APPENDIX_aux_generate_results.py`: generates the simulation results for Figures 6 and 7.
+
+* `06_APPENDIX_Figures_6_and_7.py`: optimal scaling for the MH-SS algorithms and acceptance rates, where $\alpha = \alpha_1 \times \alpha_2$, based on a logistic regression target in dimension $d=100$ with $n=30,000$ observations, and with covariates and true coefficients simulated as described in Section 5 of the paper. The efficiency metric (MSJD/E(B)) is plotted as a function of the scaling parameter ($\lambda$) and the empirical acceptance rate. 
+
 
 ## Real-world applications
 
