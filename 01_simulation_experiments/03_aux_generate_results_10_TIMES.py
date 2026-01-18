@@ -276,16 +276,16 @@ def run_methods(N, d, model, implementation='vectorised'):
         theta_hat, V = get_theta_hat_and_var_cov_matrix(model, x, y)
         filename_end = "N" + str(N) + 'd' + str(d) + 'Imp' + str(implementation) + 'rep' + str(i) + '.pickle'
 
-        # tuna_060_results = run_MH_SS(x, y, theta_hat, V, taylor_order = 0, npost=npost_tuna, model=model, implementation = implementation, tuna_acc_rate=0.6)
+        tuna_060_results = run_MH_SS(x, y, theta_hat, V, taylor_order = 0, npost=npost_tuna, model=model, implementation = implementation, tuna_acc_rate=0.6)
         # tuna_024_results = run_MH_SS(x, y, theta_hat, V, taylor_order = 0, npost=npost_tuna, model=model, implementation = implementation, tuna_acc_rate=0.24)
 
-        # mhss1_save_results = run_MH_SS(x, y, theta_hat, V, taylor_order = 1, npost=npost, model=model, implementation = implementation)
-        # mhss2_save_results = run_MH_SS(x, y, theta_hat, V, taylor_order = 2, npost=npost, model=model, implementation = implementation)
-        # rwm_save_results = run_RWM(x, y, theta_hat, V, npost, model=model, implementation = implementation)
+        mhss1_save_results = run_MH_SS(x, y, theta_hat, V, taylor_order = 1, npost=npost, model=model, implementation = implementation)
+        mhss2_save_results = run_MH_SS(x, y, theta_hat, V, taylor_order = 2, npost=npost, model=model, implementation = implementation)
+        rwm_save_results = run_RWM(x, y, theta_hat, V, npost, model=model, implementation = implementation)
         smh1_save_results = run_SMH(x, y, theta_hat, V, bound='orig', taylor_order=1, npost=npost_smh1, model=model, implementation = implementation)
-        # smh2_save_results = run_SMH(x, y, theta_hat, V, bound='orig', taylor_order=2, npost=npost, model=model, implementation = implementation)
-        # smh1_chris_save_results = run_SMH(x, y, theta_hat, V, bound='ChrisS', taylor_order=1, npost=npost, model=model, implementation = implementation)
-        # smh2_chris_save_results = run_SMH(x, y, theta_hat, V, bound='ChrisS', taylor_order=2, npost=npost, model=model, implementation = implementation)
+        smh2_save_results = run_SMH(x, y, theta_hat, V, bound='orig', taylor_order=2, npost=npost, model=model, implementation = implementation)
+        smh1_chris_save_results = run_SMH(x, y, theta_hat, V, bound='ChrisS', taylor_order=1, npost=npost, model=model, implementation = implementation)
+        smh2_chris_save_results = run_SMH(x, y, theta_hat, V, bound='ChrisS', taylor_order=2, npost=npost, model=model, implementation = implementation)
 
         tuna_060_name = save_dir + model + 'EfficiencyMetricsTuna_060_acc_rate' + filename_end
         tuna_024_name = save_dir + model + 'EfficiencyMetricsTuna_024_acc_rate' + filename_end
@@ -297,15 +297,15 @@ def run_methods(N, d, model, implementation='vectorised'):
         smh1_chris_file_name = save_dir + model + 'EfficiencyMetricsSMH1NB' + filename_end
         smh2_chris_file_name = save_dir + model + 'EfficiencyMetricsSMH2NB' + filename_end
 
-        # save_file(tuna_060_results, tuna_060_name)
-        # save_file(tuna_024_results, tuna_024_name)        
-        # save_file(mhss1_save_results, mhss1_file_name)
-        # save_file(mhss2_save_results, mhss2_file_name)
-        # save_file(rwm_save_results, rwm_file_name)
+        save_file(tuna_060_results, tuna_060_name)
+        save_file(tuna_024_results, tuna_024_name)        
+        save_file(mhss1_save_results, mhss1_file_name)
+        save_file(mhss2_save_results, mhss2_file_name)
+        save_file(rwm_save_results, rwm_file_name)
         save_file(smh1_save_results, smh1_file_name)
-        # save_file(smh2_save_results, smh2_file_name)
-        # save_file(smh1_chris_save_results, smh1_chris_file_name)
-        # save_file(smh2_chris_save_results, smh2_file_name)
+        save_file(smh2_save_results, smh2_file_name)
+        save_file(smh1_chris_save_results, smh1_chris_file_name)
+        save_file(smh2_chris_save_results, smh2_file_name)
 
 def run_many_times(d, implementation, model = 'logistic'):
     N = np.array([100000, 31622, 10000, 3162, 1000])
@@ -313,10 +313,10 @@ def run_many_times(d, implementation, model = 'logistic'):
     for j in range(len_N):
         run_methods(N[j], d=d, model=model, implementation=implementation)
 
-# run_many_times(10, implementation='vectorised')
-# run_many_times(30, implementation='vectorised')
-# run_many_times(50, implementation='vectorised')
-# run_many_times(100, implementation='vectorised')
+run_many_times(10, implementation='loop')
+run_many_times(30, implementation='loop')
+run_many_times(50, implementation='loop')
+run_many_times(100, implementation='loop')
 
 def get_results(N, implementation, model='logistic', rep=1):
 
@@ -403,23 +403,12 @@ def get_results(N, implementation, model='logistic', rep=1):
 
     return store_results
 
-vec1 = get_results(1000, implementation='vectorised')
-vec2 = get_results(3162, implementation='vectorised')
-vec3 = get_results(10000, implementation='vectorised')
-vec4 = get_results(31622, implementation='vectorised')
-vec5 = get_results(100000, implementation='vectorised')
+vec1 = get_results(1000, implementation='loop')
+vec2 = get_results(3162, implementation='loop')
+vec3 = get_results(10000, implementation='loop')
+vec4 = get_results(31622, implementation='loop')
+vec5 = get_results(100000, implementation='loop')
 
-results_vectorised = pd.concat([vec1, vec2, vec3, vec4, vec5])
+results_loop = pd.concat([vec1, vec2, vec3, vec4, vec5])
 
-save_file(results_vectorised, save_dir + '00_results_all_vectorised_10_times.pickle')
-
-results_vectorised = results_vectorised.drop('cpu_time', axis=1)
-
-with open(save_dir + '00_results_all_loop.pickle', 'rb') as f:
-
-    one_time_loop_results = pickle.load(f)
-    one_time_loop_results = one_time_loop_results[['N', 'd', 'method', 'cpu_time']]
-
-results_vectorised=results_vectorised.merge(one_time_loop_results, on=['N', 'd', 'method'])
-
-save_file(results_vectorised, save_dir + '00_results_all_loop_10_times.pickle')
+save_file(results_loop, save_dir + '00_results_all_loop_10_times.pickle')
