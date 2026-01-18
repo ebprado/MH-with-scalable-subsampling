@@ -68,7 +68,7 @@ height_plot = 6
 width_plot = 8
 
 # --------------------------------------------------------------
-# Figure 5
+# Figure 3
 # --------------------------------------------------------------
 plot = (ggplot(data_plot) + 
  aes(x='N', y='log_expected_B', color='method') +
@@ -96,7 +96,7 @@ scale_color_brewer(type = 'qual', palette = 'Paired'))
 plot.save('type_' + str(type_plot) + str(implementation) + '_Expected_B_by_N_10_times.pdf', height=height_plot, width=width_plot)
 
 # --------------------------------------------------------------
-# Figure 6
+# Figure 4
 # --------------------------------------------------------------
 plot = (ggplot(data_plot) + 
  aes(x='N', y='ESS_per_second', color='method') +
@@ -124,7 +124,7 @@ scale_color_brewer(type = 'qual', palette = 'Paired'))
 plot.save('type_' + str(type_plot) + str(implementation) + '_ESS_per_second_10_times.pdf', height=height_plot, width=width_plot)
 
 # --------------------------------------------------------------
-# Figure 7 (a)
+# Figure 5 (a)
 # --------------------------------------------------------------
 
 plot = (ggplot(data_plot[(data_plot['d'] == 'd = 30')]) + 
@@ -155,7 +155,7 @@ scale_color_brewer(type = 'qual', palette = 'Paired'))
 plot.save('type_' + str(type_plot) + str(implementation) + '_Expected_B_by_N_d_30_10_times.pdf', height=8, width=10)
 
 # --------------------------------------------------------------
-# Figure 7 (b)
+# Figure 5 (b)
 # --------------------------------------------------------------
 
 plot = (ggplot(data_plot[(data_plot['d'] == 'd = 30')]) + 
@@ -184,37 +184,6 @@ facet_wrap('d', scales='free_y') +
 scale_color_brewer(type = 'qual', palette = 'Paired'))
 
 plot.save('type_' + str(type_plot) + str(implementation) + '_ESS_per_second_d_30_10_times.pdf', height=8, width=10)
-
-# --------------------------------------------------------------
-# Figure 8
-# --------------------------------------------------------------
-
-plot = (ggplot(data_plot) +
- aes(x='N', y='ESS_over_B', color='method') +  
-    # geom_line(linetype = "dashed", size=0.8) +
-    # geom_point(aes(shape = 'method'), size=2.5) +
-    geom_boxplot() +
- labs(
-      y = 'log$_{10}$ ESS/E(B)',
-      x = 'log$_{10}$ n'
-      ) + 
-stat_summary(
-    aes(group = 'method', color='method'),
-    fun_y = np.mean,
-    geom = "line",
-    linetype = "dashed"
-  ) +         
-theme_bw(base_size = 12) +
-theme(plot_title = element_text(size = 20, hjust = 0.5),
-    strip_text_y = element_text(angle = 0),
-    legend_position = 'bottom',
-    legend_title = element_blank(),
-    panel_grid_major = element_blank(),
-    panel_grid_minor = element_blank()) +
-facet_wrap('d', scales='free_y') + 
-scale_color_brewer(type = 'qual', palette = 'Paired'))
-
-plot.save('type_' + str(type_plot) + str(implementation) + '_ESS_over_B_10_times.pdf', height=height_plot, width=width_plot)
 
 # --------------------------------------------------------------
 # Figure 9 (panels a and b)
@@ -248,17 +217,24 @@ scale_color_brewer(type = 'qual', palette = 'Paired'))
 plot.save('type_' + str(type_plot) + str(implementation) + '_ESS_per_second_d_50_100_10_times.pdf', height=8, width=5)
 
 # --------------------------------------------------------------
-# KSD
+# Figure 13
 # --------------------------------------------------------------
-plot = (ggplot(data_plot) + 
- aes(x='N', y='log_KSD', color='method') +
+
+plot = (ggplot(data_plot) +
+ aes(x='N', y='ESS_over_B', color='method') +  
     # geom_line(linetype = "dashed", size=0.8) +
     # geom_point(aes(shape = 'method'), size=2.5) +
     geom_boxplot() +
-   labs(
-      y = 'log$_{10}$ KSD',
+ labs(
+      y = 'log$_{10}$ ESS/E(B)',
       x = 'log$_{10}$ n'
-      ) +     
+      ) + 
+stat_summary(
+    aes(group = 'method', color='method'),
+    fun_y = np.mean,
+    geom = "line",
+    linetype = "dashed"
+  ) +         
 theme_bw(base_size = 12) +
 theme(plot_title = element_text(size = 20, hjust = 0.5),
     strip_text_y = element_text(angle = 0),
@@ -269,4 +245,4 @@ theme(plot_title = element_text(size = 20, hjust = 0.5),
 facet_wrap('d', scales='free_y') + 
 scale_color_brewer(type = 'qual', palette = 'Paired'))
 
-plot.save('log_KSD_logistic_regression_10_times.pdf', height=height_plot, width=width_plot)
+plot.save('type_' + str(type_plot) + str(implementation) + '_ESS_over_B_10_times.pdf', height=height_plot, width=width_plot)
