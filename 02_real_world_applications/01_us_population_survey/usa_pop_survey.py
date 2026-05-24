@@ -2,12 +2,22 @@ from PyMHSS import *
 import patsy
 from plotnine import ggplot, aes, geom_density, labs, theme_minimal, theme, element_text
 import pandas as pd
+from pathlib import Path
 
 dataset = 'usa'
-model = 'logistic' 
-# dir = os.getcwd()
-dir = '/home/pradoe/code/01_PyMHSS/02_real_world_applications/01_us_population_survey/'
-train = pd.read_table( dir + 'usa_00002.csv', sep=',')
+model = 'logistic'
+
+# Directory containing this script
+BASE_DIR = Path(__file__).resolve().parent
+
+# Data directory
+DATA_DIR = BASE_DIR / "01_us_population_survey"
+
+# Read dataset
+train = pd.read_table(DATA_DIR / "usa_00002.csv", sep=",")
+
+# Output directory
+dir = DATA_DIR
 
 n_tot = train.shape[0]
 
