@@ -1,7 +1,12 @@
 from PyMHSS import *
 import pandas as pd
 
-os.chdir('/home/pradoe/code/01_PyMHSS/01_simulation_experiments/results/')
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+RESULTS_DIR = BASE_DIR / "results"
+
+os.chdir(RESULTS_DIR)
 
 def organise_outputs(type_plot, implementation, remove_tuna_024 = True):
 
