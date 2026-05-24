@@ -1,12 +1,25 @@
 from PyMHSS import *
+from pathlib import Path
 
 dataset = 'hepmass'
 model = 'probit'
 
-# dir = os.getcwd()
-dir = '/home/pradoe/code/01_PyMHSS/02_real_world_applications/03_hepmass/'
+# Directory containing this script
+BASE_DIR = Path(__file__).resolve().parent
 
-train = pd.read_table(dir + 'all_train.csv', sep=',', index_col=False)
+# Data directory
+DATA_DIR = BASE_DIR / "03_hepmass"
+
+# Read dataset
+train = pd.read_table(
+    DATA_DIR / "all_train.csv",
+    sep=",",
+    index_col=False
+)
+
+# Output directory
+dir = DATA_DIR
+
 train
 train.columns = ['label', 'f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9',
                   'f10', 'f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18', 'f19','f20', 'f21',
