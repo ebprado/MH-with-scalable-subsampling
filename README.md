@@ -39,7 +39,6 @@ The repository is organised into three main folders:
 
 * `06_APPENDIX_Figures_6_and_7.py`: optimal scaling for the MH-SS algorithms and acceptance rates, where $\alpha = \alpha_1 \times \alpha_2$, based on a logistic regression target in dimension $d=100$ with $n=30,000$ observations, and with covariates and true coefficients simulated as described in Section 5 of the paper. The efficiency metric (MSJD/E(B)) is plotted as a function of the scaling parameter ($\lambda$) and the empirical acceptance rate. 
 
-
 ## Real-world applications
 
 Ideally, we would have liked to have all datasets analysed in the paper within this repository. However, some of them are too big to be stored here. The US census dataset is the only one provided in this repository. The datasets detection of gas mixtures and high-energy particle physics can be found in the [UCI machine learning repository](https://archive.ics.uci.edu/); see the links below.
