@@ -1,6 +1,12 @@
+from pathlib import Path
 from PyMHSS import *
 
-save_dir = '/home/pradoe/code/01_PyMHSS/01_simulation_experiments/results/'
+# Directory containing this script
+BASE_DIR = Path(__file__).resolve().parent
+
+# Save directory
+save_dir = BASE_DIR / "results"
+save_dir.mkdir(exist_ok=True)
 
 colnames = np.array(['N','d', 'kappa', 'acc_rate', 'meanSJD', 'cpu_time', 'ESS', 'expected_B', 'acc_rate_ratio1', 'KSD'])
 
