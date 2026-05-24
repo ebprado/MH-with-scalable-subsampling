@@ -1,12 +1,25 @@
 from PyMHSS import *
+from pathlib import Path
 
 dataset = 'sensor'
 model = 'logistic'
 
-# dir = os.getcwd()
-dir = '/home/pradoe/code/01_PyMHSS/02_real_world_applications/02_detection_gas/'
+# Directory containing this script
+BASE_DIR = Path(__file__).resolve().parent
 
-train = pd.read_table(dir + 'ethylene_methane.txt', sep='\s+', header=None, skiprows = 1)
+# Data directory
+DATA_DIR = BASE_DIR / "02_detection_gas"
+
+# Read dataset
+train = pd.read_table(
+    DATA_DIR / "ethylene_methane.txt",
+    sep=r"\s+",
+    header=None,
+    skiprows=1
+)
+
+# Output directory
+dir = DATA_DIR
 
 # Rename columns ------------------------------------------
 n_tot = train.shape[0]
