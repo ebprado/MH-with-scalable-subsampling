@@ -1,6 +1,12 @@
+from pathlib import Path
 from PyMHSS import *
 
-save_dir = os.getcwd() + '/'
+# Directory containing this script
+BASE_DIR = Path(__file__).resolve().parent
+
+# Save directory
+save_dir = BASE_DIR / "results"
+save_dir.mkdir(exist_ok=True)
 
 def get_results(N, rep=10):
 
