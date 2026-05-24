@@ -1,6 +1,12 @@
+from pathlib import Path
 from PyMHSS import *
 
-save_dir = os.getcwd() + '/'
+# Directory containing this script
+BASE_DIR = Path(__file__).resolve().parent
+
+# Save directory
+save_dir = BASE_DIR / "results"
+save_dir.mkdir(exist_ok=True)
 
 def run_MH_SS(N, d, cv, chi = -1, npost=100000, rep = 10, model = 'logistic', implementation='vectorised'):
     
